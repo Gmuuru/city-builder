@@ -51,14 +51,16 @@ import {LineComponent} from "./ts/components/Line";
         </div>
       </div>
     </nav>
-	<div class='map-container' (click)="click($event)" (contextmenu)="click($event)" [ngClass]="{expanded: toggled, collapsed: !toggled}">
+	<map-container (click)="click($event)" (contextmenu)="click($event)" [ngClass]="{expanded: toggled, collapsed: !toggled}">
 		<div class='map'>
 			<line-block *ngFor="#line of getLines()" [line]="line" style="width:{{line.getWidth()}}px"></line-block>
 		</div>
-	</div>
+	</map-container>
 	
-	<build-menu *ngIf="renderer.getLines()" [ngClass]="{expanded: toggled, collapsed: !toggled}">
-		<collapse-button (click)="toggle()"></collapse-button>
+	<build-menu *ngIf="getLines().length > 0" class="panel panel-primary" [ngClass]="{expanded: toggled, collapsed: !toggled}">
+		<collapse-button>
+			<button class="btn btn-primary btn-xs glyphicon" (click)="toggle()" [ngClass]="{'glyphicon-forward': toggled, 'glyphicon-backward': !toggled}"></button>
+		</collapse-button>
 	</build-menu>
 	`,
 	directives: [LineComponent],
@@ -70,10 +72,12 @@ class mainApp {
 	file : File;
 	contentText : string;
 	toggled : boolean;
+	loaded : boolean;
 	
 	constructor(public renderer: Renderer, public HQ :HQ){
 		this.toggled = true;
 		this.file = null;
+		this.loaded = false;
 	}
 	
 	getLines() :Line[]{
