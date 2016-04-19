@@ -8,6 +8,9 @@
 	<link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap-theme.min.css">
 	<link rel="stylesheet" type="text/css" href="styles.css">
+	<link rel="stylesheet" type="text/css" href="menu.css">
+	<link rel="stylesheet" type="text/css" href="cells.css">
+	<link rel="stylesheet" type="text/css" href="buildings.css">
 	
 	
     <!-- Libraries -->
@@ -20,6 +23,7 @@
     <script src="node_modules/angular2/bundles/angular2.dev.js"></script>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="node_modules/ng2-bootstrap/bundles/ng2-bootstrap.min.js"></script>
 
   </head>
   <body ondragstart="return false;" ondrop="return false;">
@@ -29,11 +33,15 @@
       System.config({
 	    transpiler: 'typescript', 
         typescriptOptions: { emitDecoratorMetadata: true }, 
-        packages: {        
-          app: {
-            defaultExtension: 'ts'
-          }
-        }
+        packages: {
+			app: {
+			  format: 'register',
+			  defaultExtension: 'js'
+			}
+		  },
+		  map: {
+			moment: 'node_modules/ng2-bootstrap/node_modules/moment/moment.js'
+		  }
       });
       System.import('app/main')
             .then(null, console.error.bind(console));

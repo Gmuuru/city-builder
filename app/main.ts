@@ -8,6 +8,8 @@ import {Parser} from "./ts/classes/Parser";
 import {ProgressiveLoader} from "./ts/classes/ProgressiveLoader";
 import {Renderer} from "./ts/classes/Renderer";
 import {HQ} from "./ts/classes/Headquarter";
+import {RoadService} from "./ts/classes/RoadService";
+import {BuildMenuComponent} from "./ts/components/BuildMenu";
 import {Line} from "./ts/components/Line";
 import {LineComponent} from "./ts/components/Line";
 
@@ -51,20 +53,27 @@ import {LineComponent} from "./ts/components/Line";
         </div>
       </div>
     </nav>
-	<map-container (click)="click($event)" (contextmenu)="click($event)" [ngClass]="{expanded: toggled, collapsed: !toggled}">
+	<map-container class="panel panel-primary" (click)="click($event)" (contextmenu)="click($event)" [ngClass]="{expanded: toggled, collapsed: !toggled}">
 		<div class='map'>
 			<line-block *ngFor="#line of getLines()" [line]="line" style="width:{{line.getWidth()}}px"></line-block>
 		</div>
 	</map-container>
 	
-	<build-menu *ngIf="getLines().length > 0" class="panel panel-primary" [ngClass]="{expanded: toggled, collapsed: !toggled}">
+	<build-menu *ngIf="getLines().length > 0" [ngClass]="{expanded: toggled, collapsed: !toggled}">
 		<collapse-button>
-			<button class="btn btn-primary btn-xs glyphicon" (click)="toggle()" [ngClass]="{'glyphicon-forward': toggled, 'glyphicon-backward': !toggled}"></button>
+			<button *ngIf="!toggled" class="btn btn-primary btn-xs glyphicon glyphicon-backward" (click)="toggle()"></button>
 		</collapse-button>
+		<div class="accordion-container panel panel-primary">
+			<div class="panel-heading clearfix">
+				<span *ngIf="toggled" class="btn btn-primary btn-xs glyphicon glyphicon-forward pull-left" (click)="toggle()"></span>
+				<span class="menu-title">Build Menu</span>
+			</div>
+			<build-accordion></build-accordion>
+		</div>
 	</build-menu>
 	`,
-	directives: [LineComponent],
-	providers: [Renderer, ProgressiveLoader, HQ]
+	directives: [LineComponent, BuildMenuComponent],
+	providers: [Renderer, ProgressiveLoader, HQ, RoadService]
 }
 )
 class mainApp {
@@ -72,12 +81,10 @@ class mainApp {
 	file : File;
 	contentText : string;
 	toggled : boolean;
-	loaded : boolean;
 	
 	constructor(public renderer: Renderer, public HQ :HQ){
-		this.toggled = true;
+		this.toggled = false;
 		this.file = null;
-		this.loaded = false;
 	}
 	
 	getLines() :Line[]{
@@ -85,6 +92,7 @@ class mainApp {
 	}
 	
 	newMap(x:number, y:number) : void{
+		this.toggled = true;
 		var lines : Line[] = [];
 		for(var i = 0; i < y; i++){
 			var line:Line = new Line(i, x);
@@ -98,7 +106,7 @@ class mainApp {
 	//events
 	
 	click($event){
-		this.HQ.alertOnClick($event);
+		this.HQ.alertMainMouseEvent($event, "click");
 	}
 	
 	// file reading
@@ -110,6 +118,7 @@ class mainApp {
 	read(): void {
 		var reader : FileReader = new FileReader();
 		reader.onload  = (e) => {
+			this.toggled = true;
 			var lines = Parser.parse(reader.result);
 			this.renderer.render(lines);
 		};

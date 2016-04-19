@@ -1,0 +1,15 @@
+<accordion [closeOthers]="oneAtATime">
+	<accordion-group *ngFor="#section of sections" [heading]="section.title">
+		<div class="row">
+			<div class="col-xs-{{section.colsize}} col-sm-{{section.colsize}} col-md-{{section.colsize}} col-lg-{{section.colsize}}" 
+				*ngFor="#item of section.content">
+				<div class="btn col-xs-12 col-sm-12 col-md-12 col-lg-12" 
+					[ngClass]="{'btn-default' : selected != item.name, 'btn-primary' : selected == item.name}"
+					(click)="select(item.name)">
+					<div class="icon {{item.name}}"></div>
+					<div>{{item.label}}</div>
+				</div>
+			</div>
+		</div>
+	</accordion-group>
+</accordion>

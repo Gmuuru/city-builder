@@ -1,4 +1,4 @@
-System.register(["angular2/core", "./Renderer"], function(exports_1) {
+System.register(["angular2/core", "./RoadService"], function(exports_1) {
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
         if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -8,79 +8,55 @@ System.register(["angular2/core", "./Renderer"], function(exports_1) {
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, Renderer_1;
+    var core_1, RoadService_1;
     var HQ;
     return {
         setters:[
             function (core_1_1) {
                 core_1 = core_1_1;
             },
-            function (Renderer_1_1) {
-                Renderer_1 = Renderer_1_1;
+            function (RoadService_1_1) {
+                RoadService_1 = RoadService_1_1;
             }],
         execute: function() {
             HQ = (function () {
-                function HQ(renderer) {
-                    this.renderer = renderer;
-                    this.state = "";
-                    this.highlightedCells = [];
-                    this.building = '-';
+                function HQ(roadService) {
+                    this.roadService = roadService;
+                    this.defaultService = null;
+                    this.defaultState = "";
+                    this.reset();
                 }
                 HQ.prototype.reset = function () {
-                    this.highlightedCells.forEach(function (cell) { cell.highlight(null); });
-                    this.highlightedCells = [];
-                    this.originCell = null;
-                    this.currentCell = null;
+                    if (this.currentService) {
+                        this.currentService.reset();
+                    }
+                    this.state = this.defaultState;
+                    this.currentService = this.defaultService;
                 };
-                HQ.prototype.alertOnClick = function ($event) {
+                HQ.prototype.alertMainMouseEvent = function ($event, action) {
                     this.reset();
-                };
-                HQ.prototype.alertOnEnter = function ($event, cell) {
-                    this.currentCell = cell;
-                    if ($event.buttons == 1) {
-                        this.highlighCells();
+                    if (this.currentService) {
+                        this.currentService.reset();
                     }
                 };
-                HQ.prototype.alertOnMouseUp = function ($event, cell) {
-                    var _this = this;
-                    if ($event.button == 0) {
-                        //left click
-                        if (cell) {
-                            this.highlightedCells.forEach(function (hlCell) {
-                                hlCell.char = _this.building;
-                                _this.renderer.renderCell(hlCell, true);
-                            });
-                        }
+                HQ.prototype.alertCellMouseEvent = function ($event, action, cell) {
+                    if (this.currentService) {
+                        this.currentService.alertCellMouseEvent($event, action, cell);
+                    }
+                };
+                HQ.prototype.notifySelection = function (type, selection) {
+                    this.state = type;
+                    if (type == "PATHING") {
+                        this.currentService = this.roadService;
+                        this.currentService.init([selection]);
+                    }
+                    else {
                         this.reset();
                     }
-                    else if ($event.button == 1) {
-                        this.reset();
-                    }
-                };
-                HQ.prototype.alertOnMouseDown = function ($event, cell) {
-                    if ($event.button == 0) {
-                        this.originCell = cell;
-                        this.state = "tracing path";
-                        this.highlighCells();
-                    }
-                };
-                HQ.prototype.highlighCells = function () {
-                    var _this = this;
-                    var startX = this.originCell.lineIndex;
-                    var startY = this.originCell.colIndex;
-                    var endX = this.currentCell.lineIndex;
-                    var endY = this.currentCell.colIndex;
-                    this.highlightedCells.forEach(function (cell) { cell.highlight(null); });
-                    this.highlightedCells = [];
-                    var cells = this.renderer.getCellsInPath(this.originCell.lineIndex, this.originCell.colIndex, this.currentCell.lineIndex, this.currentCell.colIndex);
-                    cells.forEach(function (cell) {
-                        _this.highlightedCells.push(cell);
-                        cell.highlight("green");
-                    });
                 };
                 HQ = __decorate([
                     core_1.Injectable(), 
-                    __metadata('design:paramtypes', [Renderer_1.Renderer])
+                    __metadata('design:paramtypes', [RoadService_1.RoadService])
                 ], HQ);
                 return HQ;
             })();

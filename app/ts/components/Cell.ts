@@ -92,6 +92,18 @@ export class Cell {
 	  }
 	  
 	}
+	
+	public static getCharFromName(name : string) : string{
+		for (var char in Cell.prototype.MAP_TABLE) {
+			if (Cell.prototype.MAP_TABLE.hasOwnProperty(char)) {
+				var data = Cell.prototype.MAP_TABLE[char];
+				if(data && data[1] == name){
+					return char;
+				}
+			}
+		}
+		return null;
+	}
 }
 
 
@@ -126,21 +138,21 @@ export class CellComponent {
 	}
 	
 	mouseEnter($event){
-		this.HQ.alertOnEnter($event, this.cell);
+		this.HQ.alertCellMouseEvent($event, "enter", this.cell);
 	}
 	
 	mouseDown($event){
-		this.HQ.alertOnMouseDown($event, this.cell);
+		this.HQ.alertCellMouseEvent($event, "down", this.cell);
 	}
 	
 	mouseUp($event){
-		this.HQ.alertOnMouseUp($event, this.cell);
+		this.HQ.alertCellMouseEvent($event,"up", this.cell);
 	}
 }
 
 Cell.prototype.MAP_TABLE = {};
-Cell.prototype.MAP_TABLE[""] = [" ", "grass", 1, 1, "grass"];
 Cell.prototype.MAP_TABLE[" "] = [" ", "grass", 1, 1, "grass"];
+Cell.prototype.MAP_TABLE[""] = [" ", "grass", 1, 1, "grass"];
 Cell.prototype.MAP_TABLE["."] = [".", "1x1", 1, 1, "arid"];
 Cell.prototype.MAP_TABLE["Œ"] = ["Œ", "rocks", 1, 1, "rocks"];
 Cell.prototype.MAP_TABLE["œ"] = ["œ", "water", 1, 1, "water"];

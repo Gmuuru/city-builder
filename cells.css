@@ -1,0 +1,40 @@
+
+line-block {
+	height:16px;
+	line-height:16px;
+	display:block;
+	margin : 0 auto;
+}
+line-block:first-child {
+	border-top : 1px solid #DDDDDD;
+	height:17px;
+	line-height:17px;
+}
+
+cell-block {
+	display : inline-block;
+	position : relative;
+	padding:0px;
+	margin:0px;
+	float:left;
+	width:16px;
+	height:16px;
+	line-height:16px;
+}
+
+
+.hl {
+	height: 16px;
+	left: 0;
+	opacity: 0.6;
+	position: absolute;
+	top: 0;
+	width: 16px;
+}
+
+.hl-green {
+	background-color : #33DD33;
+}
+.hl-red {
+	background-color : #DD3333;
+}

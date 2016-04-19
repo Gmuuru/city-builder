@@ -98,6 +98,17 @@ System.register(["angular2/core", "../classes/Headquarter"], function(exports_1)
                         return "-h";
                     }
                 };
+                Cell.getCharFromName = function (name) {
+                    for (var char in Cell.prototype.MAP_TABLE) {
+                        if (Cell.prototype.MAP_TABLE.hasOwnProperty(char)) {
+                            var data = Cell.prototype.MAP_TABLE[char];
+                            if (data && data[1] == name) {
+                                return char;
+                            }
+                        }
+                    }
+                    return null;
+                };
                 Cell = __decorate([
                     core_1.Injectable(), 
                     __metadata('design:paramtypes', [Number, Number, String])
@@ -116,13 +127,13 @@ System.register(["angular2/core", "../classes/Headquarter"], function(exports_1)
                     return 16 * this.cell.height;
                 };
                 CellComponent.prototype.mouseEnter = function ($event) {
-                    this.HQ.alertOnEnter($event, this.cell);
+                    this.HQ.alertCellMouseEvent($event, "enter", this.cell);
                 };
                 CellComponent.prototype.mouseDown = function ($event) {
-                    this.HQ.alertOnMouseDown($event, this.cell);
+                    this.HQ.alertCellMouseEvent($event, "down", this.cell);
                 };
                 CellComponent.prototype.mouseUp = function ($event) {
-                    this.HQ.alertOnMouseUp($event, this.cell);
+                    this.HQ.alertCellMouseEvent($event, "up", this.cell);
                 };
                 CellComponent = __decorate([
                     core_2.Component({
@@ -136,8 +147,8 @@ System.register(["angular2/core", "../classes/Headquarter"], function(exports_1)
             })();
             exports_1("CellComponent", CellComponent);
             Cell.prototype.MAP_TABLE = {};
-            Cell.prototype.MAP_TABLE[""] = [" ", "grass", 1, 1, "grass"];
             Cell.prototype.MAP_TABLE[" "] = [" ", "grass", 1, 1, "grass"];
+            Cell.prototype.MAP_TABLE[""] = [" ", "grass", 1, 1, "grass"];
             Cell.prototype.MAP_TABLE["."] = [".", "1x1", 1, 1, "arid"];
             Cell.prototype.MAP_TABLE["Œ"] = ["Œ", "rocks", 1, 1, "rocks"];
             Cell.prototype.MAP_TABLE["œ"] = ["œ", "water", 1, 1, "water"];

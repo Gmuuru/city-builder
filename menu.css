@@ -1,0 +1,28 @@
+
+build-menu  accordion .panel-heading {
+	padding:5px
+}
+build-menu  accordion .panel-title {
+	font-size: 14px;
+	height: 3vh;
+    line-height: 3vh;
+}
+
+build-menu  accordion .panel-body{
+	padding : 5px;
+}
+
+build-menu  accordion .panel-body .btn{ 
+	line-height: 20px;
+	padding: 3px;
+	margin-bottom : 5px;
+}
+
+build-menu  accordion .panel-body .icon {
+	vertical-align: middle;
+	padding-right: 3px;
+	background-size: 16px 16px;
+	margin: 0 auto;
+	width:16px;
+	height:16px;
+}
