@@ -1,6 +1,6 @@
 import { Component } from "angular2/core";
 import {Cell} from "./Cell";
-import {CellComponent} from "./Cell";
+import {CellComponent} from "./CellComponent";
 
 export class Line {
 
@@ -47,4 +47,7 @@ export class Line {
 export class LineComponent {
 
 	line : Line;
+	
+	constructor(){
+	}
 }
