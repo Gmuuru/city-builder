@@ -1,17 +1,24 @@
 /// <reference path="../node_modules/angular2/ts/typings/node/node.d.ts"/>
 /// <reference path="../node_modules/angular2/typings/browser.d.ts"/>
-import { bootstrap } from "angular2/platform/browser";
-import { Component } from "angular2/core";
-import { Injectable } from "angular2/core";
 
-import {Parser} from "./ts/classes/Parser";
-import {ProgressiveLoader} from "./ts/classes/ProgressiveLoader";
-import {Renderer} from "./ts/classes/Renderer";
-import {HQ} from "./ts/classes/Headquarter";
-import {RoadService} from "./ts/classes/RoadService";
+import { bootstrap } 		from "angular2/platform/browser";
+import { Component } 		from "angular2/core";
+import { Injectable } 		from "angular2/core";
+
+import {Headquarter} 		from "./ts/services/Headquarter";
+import {PathService} 		from "./ts/services/PathService";
+import {BuildService} 		from "./ts/services/BuildService";
+import {DeleteService} 		from "./ts/services/DeleteService";
+import {SplashService} 		from "./ts/services/SplashService";
+
+import {Parser} 			from "./ts/classes/Parser";
+import {ProgressiveLoader} 	from "./ts/classes/ProgressiveLoader";
+import {Renderer} 			from "./ts/classes/Renderer";
+
 import {BuildMenuComponent} from "./ts/components/BuildMenu";
-import {Line} from "./ts/components/Line";
-import {LineComponent} from "./ts/components/Line";
+import {Line} 				from "./ts/components/Line";
+import {LineComponent} 		from "./ts/components/Line";
+import {ServiceLoader} 		from "./ts/components/ServiceLoader";
 
 //############################ APP #########################################
 
@@ -19,12 +26,11 @@ import {LineComponent} from "./ts/components/Line";
 {
 	selector: 'reader',
 	template: `
-	
     <!-- Menu Bar -->
     <nav class="navbar navbar-inverse">
       <div class="container-fluid">
         <div class="navbar-header">
-          <a style="color:#DDDDDD" href="#" class="navbar-brand">Angular2 testing</a>
+          <a style="color:#DDDDDD" href="#" class="navbar-brand">Emperor City Planner</a>
         </div>
         <div>
           <ul class="nav navbar-nav">
@@ -51,12 +57,17 @@ import {LineComponent} from "./ts/components/Line";
 			</li>
           </ul>
         </div>
+		<current-action class="pull-right">
+			{{currentAction}}
+			<span *ngIf="currentAction && currentMessage">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+			{{currentMessage}}
+		</current-action>
       </div>
     </nav>
 	<map-container class="panel panel-primary" (click)="click($event)" (contextmenu)="click($event)" [ngClass]="{expanded: toggled, collapsed: !toggled}">
-		<div class='map'>
+		<map>
 			<line-block *ngFor="#line of getLines()" [line]="line" style="width:{{line.getWidth()}}px"></line-block>
-		</div>
+		</map>
 	</map-container>
 	
 	<build-menu *ngIf="getLines().length > 0" [ngClass]="{expanded: toggled, collapsed: !toggled}">
@@ -71,9 +82,13 @@ import {LineComponent} from "./ts/components/Line";
 			<build-accordion></build-accordion>
 		</div>
 	</build-menu>
+	<service-loader></service-loader>
 	`,
-	directives: [LineComponent, BuildMenuComponent],
-	providers: [Renderer, ProgressiveLoader, HQ, RoadService]
+	host: {
+		'(document:keypress)': 'onKeyPress($event)'
+	},
+	directives: [LineComponent, BuildMenuComponent, ServiceLoader],
+	providers : [ProgressiveLoader, Renderer, Headquarter, PathService, BuildService, DeleteService, SplashService]
 }
 )
 class mainApp {
@@ -81,12 +96,30 @@ class mainApp {
 	file : File;
 	contentText : string;
 	toggled : boolean;
+	currentAction : string;
+	currentMessage : string;
 	
-	constructor(public renderer: Renderer, public HQ :HQ){
+	constructor(public renderer: Renderer, public HQ :Headquarter){
 		this.toggled = false;
 		this.file = null;
+		this.currentAction = "";
+		this.currentMessage = "";
+		this.HQ.actionChange$.subscribe(
+			(action) => {
+				this.currentAction = action;
+			}
+		);
+		this.HQ.messageChange$.subscribe(
+			(msg) => {
+				this.currentMessage = msg;
+			}
+		);
+		this.HQ.toggle$.subscribe(
+			(action) => {
+				this.toggle();
+			}
+		);
 	}
-	
 	getLines() :Line[]{
 		return this.renderer.getLines();
 	}
@@ -105,8 +138,15 @@ class mainApp {
 	
 	//events
 	
+	onKeyPress($event){
+		this.HQ.keyPress($event);
+	}
+	
 	click($event){
-		this.HQ.alertMainMouseEvent($event, "click");
+		var target = $event.target;
+		if(target.tagName == 'MAP' || target.tagName == 'MAP-CONTAINER'){
+			this.HQ.alertMainMouseEvent($event, "click");
+		}
 	}
 	
 	// file reading

@@ -1,8 +1,11 @@
+.delete {
+	background-image : url("img/delete.gif");
+}
 .grass {
 	background-image : url("img/grass.gif");
 }
-.1x1 {
-	background-image : url("img/1x1.gif");
+.dirt {
+	background-image : url("img/dirt.gif");
 }
 .rocks {
 	background-image : url("img/rocks.gif");
@@ -97,10 +100,10 @@
 .roadblock {
 	background-image : url("img/roadblock.gif");
 }
-.rw-gate-h {
+.rgate-h {
 	background-image : url("img/rw-gate-h.gif");
 }
-.rw-gate-v {
+.rgate-v {
 	background-image : url("img/rw-gate-v.gif");
 }
 .gate-h {
@@ -177,11 +180,23 @@
 .ferry-s {
 	background-image : url("img/ferry-s.gif");
 }
+.ferry-n {
+	background-image : url("img/ferry-n.gif");
+}
+.ferry-w {
+	background-image : url("img/ferry-w.gif");
+}
 .wharf-e {
 	background-image : url("img/wharf-e.gif");
 }
 .wharf-s {
 	background-image : url("img/wharf-s.gif");
+}
+.wharf-w {
+	background-image : url("img/wharf-w.gif");
+}
+.wharf-n {
+	background-image : url("img/wharf-n.gif");
 }
 .militarycamp-h {
 	background-image : url("img/militarycamp-h.gif");
@@ -255,8 +270,8 @@
 .herbalist {
 	background-image : url("img/herbalist.gif");
 }
-.accupuncturist {
-	background-image : url("img/accupuncturist.gif");
+.acupuncturist {
+	background-image : url("img/acupuncturist.gif");
 }
 .refinery {
 	background-image : url("img/refinery.gif");
@@ -291,7 +306,7 @@
 .wheat {
 	background-image : url("img/wheat.gif");
 }
-.well {
+.h-well {
 	background-image : url("img/well.gif");
 }
 .rice {
@@ -308,6 +323,15 @@
 }
 .millet {
 	background-image : url("img/millet.gif");
+}
+.tea {
+	background-image : url("img/tea.gif");
+}
+.silk {
+	background-image : url("img/silk.gif");
+}
+.laquer {
+	background-image : url("img/laquer.gif");
 }
 .taxoffice {
 	background-image : url("img/taxoffice.gif");

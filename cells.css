@@ -32,6 +32,10 @@ cell-block {
 	width: 16px;
 }
 
+.hl div {
+	cursor:default;
+}
+
 .hl-green {
 	background-color : #33DD33;
 }

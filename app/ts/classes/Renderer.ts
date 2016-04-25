@@ -3,6 +3,7 @@ import {Injectable} from "angular2/core";
 import {ProgressiveLoader} from "./ProgressiveLoader";
 import {Line} from "../components/Line";
 import {Cell} from "../components/Cell";
+import {Building} from "../components/Cell";
 
 @Injectable()
 export class Renderer {
@@ -38,6 +39,93 @@ export class Renderer {
 		return this.lines;
 	}
 	
+	getCellsInSquare(startLinePos :number,startColPos :number,endLinePos :number, endColPos:number) :Cell[]{
+		var res : Cell[] = [];
+		var topLine = Math.min(startLinePos, endLinePos);
+		var bottomLine = Math.max(startLinePos, endLinePos);
+		var leftCol = Math.min(startColPos, endColPos);
+		var rightCol = Math.max(startColPos, endColPos);
+		
+		var res : Cell[] = [];
+		for(var i = topLine; i <= bottomLine; i++){
+			for(var j = leftCol; j <= rightCol; j++){
+				res.push(this.lines[i].cells[j]);
+			}
+		}
+		return res;
+	}
+	
+	getCellsInBuilding(linePos : number, colPos : number, building :Building) :Cell[]{
+		var res : Cell[] = [];
+		var width  = building.width;
+		var height = building.height;
+		if(linePos+height > this.lines.length || colPos+width >  this.lines[0].cells.length){
+			//out of bounds
+			return null;
+		}
+		
+		for(var i = 0; i < height; i++){
+			for(var j = 0; j < width; j++){
+				res.push(this.lines[linePos+i].cells[colPos+j]);
+			}
+		}
+		return res;
+	}
+
+	getCellsInLine(linePos:number, startColPos :number, endColPos:number, height :number) :Cell[] {
+		var res = [];
+		// on ne prend qu'en horizontal
+		var startCol = Math.min(startColPos, endColPos);
+		var endCol = Math.max(startColPos, endColPos);
+		for(var i = startCol; i <= endCol; i++){
+			if(height >=3 && linePos > 0){
+				res.push(this.lines[linePos-1].cells[i]);
+			}
+			res.push(this.lines[linePos].cells[i]);
+			if(height >=2 && linePos < this.lines.length-1){
+				res.push(this.lines[linePos+1].cells[i]);
+			}
+		}
+		return res;
+	}
+
+	getCellsInCol(colPos :number, startLinePos :number,endLinePos :number, width :number) :Cell[] {
+		var res = [];
+		// on ne prend qu'en vertical
+		var startLine = Math.min(startLinePos, endLinePos);
+		var endLine = Math.max(startLinePos, endLinePos);
+		for(var i = startLine; i <= endLine; i++){
+			if(width >=3 && colPos > 0){
+				res.push(this.lines[i].cells[colPos-1]);
+			}
+			res.push(this.lines[i].cells[colPos]);
+			if(width >=2 && colPos < this.lines[0].cells.length-1){
+				res.push(this.lines[i].cells[colPos+1]);
+			}
+		}
+		
+
+		return res;
+	}
+
+
+	detectOOBForLargeRoads(cell : Cell, building :Building) :boolean {
+
+		if(building.width >=2 && cell.colIndex >= this.lines[0].cells.length -1 ){
+			return true;
+		}
+		if(building.width >=3 && cell.colIndex == 0){
+			return true;
+		}
+		if(building.height >=2 && cell.lineIndex >= this.lines.length -1 ){
+			return true;
+		}
+		if(building.height >=3 && cell.lineIndex == 0){
+			return true;
+		}
+		return false;
+	}
+
 	getCellsInPath(startLinePos :number,startColPos :number,endLinePos :number, endColPos:number) :Cell[] {
 		var res = [];
 		if(startLinePos == endLinePos && startColPos == endColPos){
@@ -51,7 +139,7 @@ export class Renderer {
 			for(var i = startLinePos; i <= endLinePos; i++){
 				res.push(this.lines[i].cells[startColPos]);
 			}
-			for(var j = startColPos; j <= endColPos; j++){
+			for(var j = startColPos+1; j <= endColPos; j++){
 				res.push(this.lines[endLinePos].cells[j]);
 			}
 		} else if(startLinePos >= endLinePos && startColPos < endColPos){
@@ -59,7 +147,7 @@ export class Renderer {
 			for(var i = startColPos; i <= endColPos; i++){
 				res.push(this.lines[startLinePos].cells[i]);
 			}
-			for(var j = startLinePos; j >= endLinePos; j--){
+			for(var j = startLinePos-1; j >= endLinePos; j--){
 				res.push(this.lines[j].cells[endColPos]);
 			}
 		} else if(startLinePos > endLinePos && startColPos >= endColPos){
@@ -67,7 +155,7 @@ export class Renderer {
 			for(var i = startLinePos; i >= endLinePos; i--){
 				res.push(this.lines[i].cells[startColPos]);
 			}
-			for(var j = startColPos; j >= endColPos; j--){
+			for(var j = startColPos-1; j >= endColPos; j--){
 				res.push(this.lines[endLinePos].cells[j]);
 			}
 		} else if(startLinePos <= endLinePos && startColPos > endColPos){
@@ -75,7 +163,7 @@ export class Renderer {
 			for(var i = startColPos; i >= endColPos; i--){
 				res.push(this.lines[startLinePos].cells[i]);
 			}
-			for(var j = startLinePos; j <= endLinePos; j++){
+			for(var j = startLinePos+1; j <= endLinePos; j++){
 				res.push(this.lines[j].cells[endColPos]);
 			}
 		}
@@ -88,57 +176,83 @@ export class Renderer {
 		this.init = true;
 	}
 	
+	deleteBuilding(cell:Cell) :void {
+		if(cell.ref){
+			// on detruit tjs un building pas sa cellule de ref (top left)
+			this.deleteBuilding(cell.ref);
+		} else {
+			var x = cell.getBuilding().height;
+			var y = cell.getBuilding().width;
+			for(var i = 0; i < x; i++){
+				for(var j = 0; j < y; j++){
+					this.deleteCell(this.lines[cell.lineIndex+i].cells[cell.colIndex+j]);
+				}
+			}
+		}
+	}
 	
+	deleteCell(cell:Cell) :void {
+		var originalChar = cell.getBuilding().char;
+		
+		cell.ref = null;
+		cell.setBuilding(Building.getDefaultBuilding());
+		cell.render(sc);
+		
+		if(originalChar != null && (originalChar == '-' || originalChar == 't' || originalChar == '_')){
+			// on met a jour les cellules autour
+			var sc = this.getSurroundingConfig(originalChar, cell.lineIndex, cell.colIndex);
+			this.renderSurroundingCells(cell.lineIndex, cell.colIndex, sc);
+		}
+	}
 	
 	renderCell(cell:Cell, renderSurroundingCells : boolean):void {
 		
 		if(cell.ref){
 			return;
 		}
-		var c:string = cell.char; 
+		var c:string = cell.getBuilding().char; 
 		var sc:number = this.getSurroundingConfig(c, cell.lineIndex, cell.colIndex);
 		cell.render(sc);
 		
-		if(cell.width+cell.height > 2){
+		if(cell.getBuilding().width+cell.getBuilding().height > 2){
 			this.spreadRefCell(cell);
 		}
 		
-		if(renderSurroundingCells && cell.char != null && (cell.char == '-' || cell.char == 't' || cell.char == '_')){
+		if(renderSurroundingCells && c != null && (c == '-' || c == 't' || c == '_')){
 			// il faut regenerer les cellules environnantes dans le cas des path
-			this.renderSurroundingCells(cell, sc);
+			this.renderSurroundingCells(cell.lineIndex, cell.colIndex, sc);
 		}
 		
 	}
 	
-	renderSurroundingCells(cell:Cell, sc:number){
+	renderSurroundingCells(x:number, y:number, sc:number){
 		if(sc == 0){
 			return;
 		}
 		var cellToRender = null;
 		var scToRender = null;
-		var c = cell.char;
 		if(sc == 1 || sc == 5 || sc == 7 || sc == 8 || sc == 11 || sc == 12 || sc == 14 || sc == 15){
 			// top cell
-			cellToRender = this.lines[cell.lineIndex-1].cells[cell.colIndex];
-			scToRender = this.getSurroundingConfig(c, cellToRender.lineIndex, cellToRender.colIndex);
+			cellToRender = this.lines[x-1].cells[y];
+			scToRender = this.getSurroundingConfig(cellToRender.getBuilding().char, cellToRender.lineIndex, cellToRender.colIndex);
 			cellToRender.render(scToRender);
 		}
 		if(sc == 2 || sc == 6 || sc == 8 || sc == 9 || sc == 11 || sc == 13 || sc == 14 || sc == 15){
 			//right cell
-			cellToRender = this.lines[cell.lineIndex].cells[cell.colIndex+1];
-			scToRender = this.getSurroundingConfig(c, cellToRender.lineIndex, cellToRender.colIndex);
+			cellToRender = this.lines[x].cells[y+1];
+			scToRender = this.getSurroundingConfig(cellToRender.getBuilding().char, cellToRender.lineIndex, cellToRender.colIndex);
 			cellToRender.render(scToRender);
 		}
 		if(sc == 3 || sc == 5 || sc == 9 || sc == 10 || sc == 12 || sc == 13 || sc == 14 || sc == 15){
 			//bottom cell
-			cellToRender = this.lines[cell.lineIndex+1].cells[cell.colIndex];
-			scToRender = this.getSurroundingConfig(c, cellToRender.lineIndex, cellToRender.colIndex);
+			cellToRender = this.lines[x+1].cells[y];
+			scToRender = this.getSurroundingConfig(cellToRender.getBuilding().char, cellToRender.lineIndex, cellToRender.colIndex);
 			cellToRender.render(scToRender);
 		}
 		if(sc == 4 || sc == 6 || sc == 7 || sc == 10 || sc == 11 || sc == 12 || sc == 13 || sc == 15){
 			//left cell
-			cellToRender = this.lines[cell.lineIndex].cells[cell.colIndex-1];
-			scToRender = this.getSurroundingConfig(c, cellToRender.lineIndex, cellToRender.colIndex);
+			cellToRender = this.lines[x].cells[y-1];
+			scToRender = this.getSurroundingConfig(cellToRender.getBuilding().char, cellToRender.lineIndex, cellToRender.colIndex);
 			cellToRender.render(scToRender);
 		}
 	}
@@ -235,15 +349,15 @@ export class Renderer {
 		if(x < 0 || x == source.length || y < 0 || y == source[0].cells.length){
 			return false;
 		}
-		return c == source[x].cells[y].char;
+		return c == source[x].cells[y].getBuilding().char;
 	}
 	
 	spreadRefCell(ref:Cell){
 		var source = this.init ? this.storage : this.lines;
 		var refLine:number = ref.lineIndex;
 		var refCol:number = ref.colIndex;
-		var refWidth:number = ref.width;
-		var refHeight:number = ref.height;
+		var refWidth:number = ref.getBuilding().width;
+		var refHeight:number = ref.getBuilding().height;
 		var lineOffset:number = 0;
 		var colOffset:number = 0;
 		

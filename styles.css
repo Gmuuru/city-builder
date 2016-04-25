@@ -11,6 +11,13 @@ reader {
 	display:block;
 }
 
+current-action {
+	display : block;
+	width : 285px;
+	height : 35px;
+	margin-top:15px;
+	color : white;
+}
 map-container.panel {	
 	display:block;
 	position:relative;
@@ -23,7 +30,7 @@ map-container.panel {
 	margin-bottom:0px;
 }
 
-div.map {	
+map {	
 	display:block;
 	position:relative;
 	top:0;
@@ -51,7 +58,9 @@ build-menu .accordion-container accordion, build-menu .accordion-container .pane
     width: 300px;
 }
 build-menu .accordion-container > .panel-heading {
-	height: 42px;
+	height: 7vh;
+	max-height:42px;
+    padding: 1vh;
 }
 
 build-menu .accordion-container .btn {
