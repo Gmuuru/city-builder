@@ -7,6 +7,6 @@ export interface Service {
 	alertCellMouseEvent($event, action :string, cell :Cell) :void;
 	reset() :void;
 	rotate() :string;
-	init( args? : string[] ) :void;
+	init( args? : any ) :void;
 	
 }

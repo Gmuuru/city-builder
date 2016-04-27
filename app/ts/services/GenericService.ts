@@ -19,17 +19,18 @@ export abstract class GenericService implements Service {
 			(item) => {
 				if(item.service && this.type == item.service){
 					this.HQ.activateService(this);
-					this.init([item.name]);
+					this.init(item);
 				}
 			}
 		);
 	}
 
-	init( args? : string[] ) :void {
-		if(args && args.length > 0){
-			var name = args[0];
-			this.building = Cell.getBuildingData(Cell.getCharFromName(name));
-			console.log(`${this.name} initialized with ${name} (${this.building.char})`);
+	init( args? : any ) :void {
+		if(args && args.name){
+			// standard build service init
+			this.building = Cell.getBuildingData(Cell.getCharFromName(args.name));
+			console.log(`${this.name} initialized with ${args.name} (${this.building.char})`);
+			
 		}
 	}
 
@@ -37,10 +38,14 @@ export abstract class GenericService implements Service {
 	abstract reset() :void;
 	
 	rotate() :string{
-		this.building = this.building.rotate();
-		console.log("new building : "+this.building.name);
-		this.highlightCells();
-		return this.building.label;
+		if(this.building){
+			this.building = this.building.rotate();
+			console.log("new building : "+this.building.name);
+			this.highlightCells();
+			return this.building.label;
+		} else {
+			return null;
+		}
 	}
 	
 	abstract highlightCells();

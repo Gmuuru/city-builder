@@ -4,11 +4,12 @@ import { Collapse  } 								from 'ng2-bootstrap/ng2-bootstrap';
 import {Cell} 										from "../components/Cell";
 import {Headquarter} 										from "../services/Headquarter";
 import {HighlightDirective} 						from "../directives/highlight.directive";
+import {NgClass} 									from 'angular2/common';
 	
 @Component(
 {
 	selector: 'build-accordion',
-	directives:[HighlightDirective, Collapse],
+	directives:[HighlightDirective, Collapse, NgClass],
 	templateUrl: 'app/templates/BuildMenu.html',
 }
 )

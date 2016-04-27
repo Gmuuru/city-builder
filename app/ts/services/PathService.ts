@@ -24,9 +24,9 @@ export class PathService extends GenericService {
 	}
 	
 
-	init( args? : string[] ) :void {
-		if(args && args.length > 0){
-			var name = args[0];
+	init( args? : any ) :void {
+		if(args && args.name){
+			var name = args.name;
 			this.building = Cell.getBuildingData(Cell.getCharFromName(name));
 			this.lineOnly = false;
 			if(this.building.name.indexOf("improad") == 0 || this.building.name.indexOf("grandroad") == 0){

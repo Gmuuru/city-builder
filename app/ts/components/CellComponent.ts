@@ -9,7 +9,7 @@ import {Headquarter} 				from "../services/Headquarter";
 	selector: 'cell-block',
 	inputs:['cell'],
 	template: `
-		<div style="width:{{cellWidth()}}px; height:{{cellHeigth()}}px" class="{{cell.getBuildingName()}}" 
+		<div style="width:{{cell.getBuildingWidth()}}px; height:{{cell.getBuildingHeight()}}px" class="{{cell.getBuildingName()}}" 
 			(mousedown)="mouseDown($event)"
 			(mouseup)="mouseUp($event)"
 			(mouseenter)="mouseEnter($event)"
@@ -34,14 +34,6 @@ export class CellComponent {
 	
 	constructor(public HQ : Headquarter){}
 	
-	cellWidth() {
-		return 16*this.cell.getBuilding().width;
-	}
-	
-	cellHeigth() {
-		return 16*this.cell.getBuilding().height;
-	}
-	
 	hlOrientation () {
 		return this.cell.hlOrientation;
 	}
@@ -60,6 +52,7 @@ export class CellComponent {
 	
 	rightClick($event){
 		this.HQ.alertMainMouseEvent($event, "click");
+		console.log(this.cell);
 		$event.preventDefault();
 	}
 }

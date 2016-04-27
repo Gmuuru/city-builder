@@ -1,6 +1,9 @@
 .delete {
 	background-image : url("img/delete.gif");
 }
+.select {
+	background-image : url("img/select.gif");
+}
 .grass {
 	background-image : url("img/grass.gif");
 }

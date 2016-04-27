@@ -10,6 +10,10 @@ import {PathService} 		from "./ts/services/PathService";
 import {BuildService} 		from "./ts/services/BuildService";
 import {DeleteService} 		from "./ts/services/DeleteService";
 import {SplashService} 		from "./ts/services/SplashService";
+import {SelectService} 		from "./ts/services/SelectService";
+import {CopyService} 		from "./ts/services/CopyService";
+import {MoveService} 		from "./ts/services/MoveService";
+import {CopyAndRotateService} 		from "./ts/services/CopyAndRotateService";
 
 import {Parser} 			from "./ts/classes/Parser";
 import {ProgressiveLoader} 	from "./ts/classes/ProgressiveLoader";
@@ -19,6 +23,9 @@ import {BuildMenuComponent} from "./ts/components/BuildMenu";
 import {Line} 				from "./ts/components/Line";
 import {LineComponent} 		from "./ts/components/Line";
 import {ServiceLoader} 		from "./ts/components/ServiceLoader";
+import {SelectAreaHolder} from "./ts/components/SelectArea";
+import {ContextMenuHolder} from "./ts/components/ContextMenu";
+import {SaveMenuHolder} from "./ts/components/SaveMenu";
 
 //############################ APP #########################################
 
@@ -34,12 +41,27 @@ import {ServiceLoader} 		from "./ts/components/ServiceLoader";
         </div>
         <div>
           <ul class="nav navbar-nav">
-            <li>
-				<a href="javascript:void(0)" onclick="$('#upload').click()">Open</a>
-				<form>
-					<input id="upload" type="file" name=test style="visibility:hidden;position:absolute;top:0;left:0;width:0px" (change)="fileChangeEvent($event)">
-				</form>
-			
+          	<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					File 
+					<span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu">
+		            <li>
+						<a href="javascript:void(0)" onclick="$('#upload').click()">Open</a>
+						<form>
+							<input id="upload" type="file" name=test style="visibility:hidden;position:absolute;top:0;left:0;width:0px" (change)="fileChangeEvent($event)">
+						</form>
+					</li>
+					<li [ngClass]="{'disabled' : getLines().length == 0}">
+						<a *ngIf="getLines().length > 0" href="javascript:void(0)" (click)="openSaveMenu('text')">Save as text...</a>
+						<a *ngIf="getLines().length == 0">Save as text...</a>
+					</li>
+					<li [ngClass]="{'disabled' : getLines().length == 0}">
+						<a *ngIf="getLines().length > 0" href="javascript:void(0)" (click)="openSaveMenu('image')">Save as image...</a>
+						<a *ngIf="getLines().length == 0">Save as image...</a>
+					</li>
+				</ul>
 			</li>
 			<li class="dropdown">
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -65,7 +87,7 @@ import {ServiceLoader} 		from "./ts/components/ServiceLoader";
       </div>
     </nav>
 	<map-container class="panel panel-primary" (click)="click($event)" (contextmenu)="click($event)" [ngClass]="{expanded: toggled, collapsed: !toggled}">
-		<map>
+		<map id="map" style="width:{{getMapWidth()}}px">
 			<line-block *ngFor="#line of getLines()" [line]="line" style="width:{{line.getWidth()}}px"></line-block>
 		</map>
 	</map-container>
@@ -83,12 +105,15 @@ import {ServiceLoader} 		from "./ts/components/ServiceLoader";
 		</div>
 	</build-menu>
 	<service-loader></service-loader>
+	<select-zone-holder></select-zone-holder>
+	<context-menu-holder></context-menu-holder>
+	<save-menu-holder></save-menu-holder>
 	`,
 	host: {
 		'(document:keypress)': 'onKeyPress($event)'
 	},
-	directives: [LineComponent, BuildMenuComponent, ServiceLoader],
-	providers : [ProgressiveLoader, Renderer, Headquarter, PathService, BuildService, DeleteService, SplashService]
+	directives: [LineComponent, BuildMenuComponent, ServiceLoader, SelectAreaHolder, ContextMenuHolder, SaveMenuHolder],
+	providers : [ProgressiveLoader, Renderer, Headquarter, PathService, BuildService, DeleteService, SplashService, SelectService, CopyService, MoveService, CopyAndRotateService]
 }
 )
 class mainApp {
@@ -120,8 +145,21 @@ class mainApp {
 			}
 		);
 	}
+
+	getMapWidth(){
+		var lines = this.getLines();
+		if(lines.length > 0){
+			return lines[0].getWidth();
+		}
+		return 0;
+	}
+
 	getLines() :Line[]{
-		return this.renderer.getLines();
+		var lines = this.renderer.getLines();
+		if(!lines){
+			return [];
+		}
+		return lines;
 	}
 	
 	newMap(x:number, y:number) : void{
@@ -133,9 +171,13 @@ class mainApp {
 			lines.push(line);
 		}
 		this.renderer.render(lines);
-		
 	}
 	
+	//navbar
+	openSaveMenu(format:string) :void {
+		this.HQ.alertNavbarEvent("SaveMenu", format);
+	}
+
 	//events
 	
 	onKeyPress($event){

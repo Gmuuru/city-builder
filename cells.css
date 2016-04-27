@@ -5,11 +5,6 @@ line-block {
 	display:block;
 	margin : 0 auto;
 }
-line-block:first-child {
-	border-top : 1px solid #DDDDDD;
-	height:17px;
-	line-height:17px;
-}
 
 cell-block {
 	display : inline-block;

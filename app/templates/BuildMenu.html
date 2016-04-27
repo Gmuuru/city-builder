@@ -1,6 +1,7 @@
 <accordion class="panel-group">
-	<div class="panel panel-default" *ngFor="#section of sections">
-		<div class="panel-heading" classSwitch (click)="toggle(section)">{{section.title}}</div>
+	<div *ngFor="#section of sections" 
+		[ngClass]="{'panel-primary':section.isOpen, 'panel-default':!section.isOpen}">
+		<div class="panel-heading" [class-switch]="section.isOpen" (click)="toggle(section)">{{section.title}}</div>
 		<div class="panel-collapse" [collapse]="!section.isOpen">
 			<div class="panel-body subpanel-container {{section.decaleStatus}}" style="height : {{section.height}}px">
 				<div class="row subpanel">

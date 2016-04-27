@@ -1,4 +1,3 @@
-import { Component } 	from "angular2/core";
 
 export class Cell {
 
@@ -6,7 +5,8 @@ export class Cell {
 	private building : Building;
 	lineIndex : number;
 	colIndex : number;
-	ref : Cell;
+	public ref : Cell;
+	referenced : Cell[];
 	hl : string;
 	hlOrientation : string;
 	
@@ -14,10 +14,13 @@ export class Cell {
 		this.lineIndex = lineIndex;
 		this.colIndex = colIndex;
 		this.setBuilding(this.MAP_TABLE[char]);
+		this.referenced = [];
+		this.ref = null;
 	}
 	
 	setBuilding(building : Building) :void {
 		this.building = Building.clone(building);
+		this.referenced = [];
 	}
 
 	getBuilding() :Building{
@@ -29,6 +32,21 @@ export class Cell {
 			return null;
 		} else {
 			return this.building.name;
+		}
+	}
+	getBuildingWidth() {
+		if(this.ref){
+			return null;
+		} else {
+			return 16*this.getBuilding().width;
+		}
+	}
+	
+	getBuildingHeight() {
+		if(this.ref){
+			return null;
+		} else {
+			return 16*this.getBuilding().height;
 		}
 	}
 
@@ -46,7 +64,9 @@ export class Cell {
 	
 	setRef(ref:Cell) : void {
 		this.ref = ref;
-		this.building = null;
+		this.referenced = [];
+		ref.referenced.push(this);
+		this.setBuilding(ref.getBuilding());
 	}
 	
 	getName() :string {

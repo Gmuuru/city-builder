@@ -39,20 +39,30 @@ export class Renderer {
 		return this.lines;
 	}
 	
+	isOOB(startLinePos :number,startColPos :number,endLinePos :number, endColPos:number) :boolean{
+		return startLinePos < 0 || startColPos < 0 || 
+			endLinePos >= this.lines.length || endColPos >= this.lines[0].cells.length;
+	}
+
 	getCellsInSquare(startLinePos :number,startColPos :number,endLinePos :number, endColPos:number) :Cell[]{
 		var res : Cell[] = [];
-		var topLine = Math.min(startLinePos, endLinePos);
-		var bottomLine = Math.max(startLinePos, endLinePos);
-		var leftCol = Math.min(startColPos, endColPos);
-		var rightCol = Math.max(startColPos, endColPos);
-		
-		var res : Cell[] = [];
-		for(var i = topLine; i <= bottomLine; i++){
-			for(var j = leftCol; j <= rightCol; j++){
-				res.push(this.lines[i].cells[j]);
+		try {
+			var topLine = Math.max(0,Math.min(startLinePos, endLinePos));
+			var bottomLine = Math.min(this.lines.length-1, Math.max(startLinePos, endLinePos));
+			var leftCol = Math.max(0, Math.min(startColPos, endColPos));
+			var rightCol = Math.min(this.lines[0].cells.length-1, Math.max(startColPos, endColPos));
+			
+			var res : Cell[] = [];
+			for(var i = topLine; i <= bottomLine; i++){
+				for(var j = leftCol; j <= rightCol; j++){
+					res.push(this.lines[i].cells[j]);
+				}
 			}
+			return res;
+		} catch (err){
+			console.log(err);
+			return [];
 		}
-		return res;
 	}
 	
 	getCellsInBuilding(linePos : number, colPos : number, building :Building) :Cell[]{
@@ -181,20 +191,23 @@ export class Renderer {
 			// on detruit tjs un building pas sa cellule de ref (top left)
 			this.deleteBuilding(cell.ref);
 		} else {
-			var x = cell.getBuilding().height;
-			var y = cell.getBuilding().width;
-			for(var i = 0; i < x; i++){
-				for(var j = 0; j < y; j++){
-					this.deleteCell(this.lines[cell.lineIndex+i].cells[cell.colIndex+j]);
+			cell.referenced.forEach(
+				(refCell) => {
+					this.deleteCell(refCell);
 				}
-			}
+			);
+			this.deleteCell(cell);
 		}
 	}
 	
 	deleteCell(cell:Cell) :void {
-		var originalChar = cell.getBuilding().char;
-		
+
+		var originalChar = null;
+		if(cell.getBuilding()){
+			originalChar = cell.getBuilding().char;
+		}
 		cell.ref = null;
+		cell.referenced = [];
 		cell.setBuilding(Building.getDefaultBuilding());
 		cell.render(sc);
 		
@@ -205,6 +218,48 @@ export class Renderer {
 		}
 	}
 	
+	copyCell(source:Cell, destination:Cell) :void{
+		destination.setBuilding(source.getBuilding());
+		this.renderCell(destination, true);
+	}
+
+	isBuildingEntirelyInSelection(cell:Cell, selection:Cell[]){
+		try {
+			if(cell.ref){
+				//we perform the check for the 'main' cell of the building
+				return this.isBuildingEntirelyInSelection(cell.ref, selection);
+			}
+			if(!cell.getBuilding()){
+				console.log(`Error : cell without building and without ref !`);
+				return false;
+			}
+			var minLine = selection[0].lineIndex;
+			var minCol = selection[0].colIndex;
+			var maxLine = selection[selection.length-1].lineIndex;
+			var maxCol = selection[selection.length-1].colIndex;
+
+			if(cell.lineIndex < minLine || cell.colIndex < minCol || 
+				cell.lineIndex > maxLine || cell.colIndex > maxCol){
+				//cell itself is not in selection
+				return false;
+			}
+			if(cell.getBuilding().width + cell.getBuilding().height > 2){
+				// for buildings with size > 1x1
+				var maxBuildingLine = cell.lineIndex + cell.getBuilding().height -1;
+				var maxBuildingCol = cell.colIndex + cell.getBuilding().width -1;
+				if(maxBuildingLine < minLine || maxBuildingCol < minCol || 
+					maxBuildingLine > maxLine || maxBuildingCol > maxCol){
+					//building is not in selection
+					return false;
+				}
+			}
+			return true;
+		} catch (err){
+			console.log("isBuildingEntirelyInSelection error : ",err);
+			return false;
+		}
+	}
+
 	renderCell(cell:Cell, renderSurroundingCells : boolean):void {
 		
 		if(cell.ref){
@@ -349,6 +404,9 @@ export class Renderer {
 		if(x < 0 || x == source.length || y < 0 || y == source[0].cells.length){
 			return false;
 		}
+		if(!source[x].cells[y].getBuilding()){
+			return false;
+		}
 		return c == source[x].cells[y].getBuilding().char;
 	}
 	
@@ -365,7 +423,8 @@ export class Renderer {
 		while(lineOffset < refHeight && (refLine + lineOffset) < source.length){
 			colOffset = (lineOffset == 0) ? 1 : 0;
 			while(colOffset < refWidth && (refCol + colOffset) < source[0].cells.length){
-				source[refLine + lineOffset].cells[refCol + colOffset].setRef(ref);
+				var cell = source[refLine + lineOffset].cells[refCol + colOffset];
+				cell.setRef(ref);
 				colOffset++;
 			}
 			lineOffset++;

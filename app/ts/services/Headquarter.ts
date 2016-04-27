@@ -9,10 +9,11 @@ export class Headquarter {
 
 	currentService : Service;
 	defaultService : Service;
-	
+	detectKeyPress : boolean;
+
 	constructor(){
 		this.defaultService = null;
-		this.reset();
+		this.detectKeyPress = false;
 	}
 	
 	private _kbShortcutEventSource = new Subject<number>();
@@ -21,6 +22,8 @@ export class Headquarter {
 	private _serviceActivationSource = new Subject<any>();
 	private _currentActionSource = new Subject<string>();
 	private _currentMessageSource = new Subject<string>();
+	private _contextMenuSource = new Subject<{event : MouseEvent, source:string, data:any}>();
+	private _saveMenuSource = new Subject<any>();
 	
 	kbShortcut$ = this._kbShortcutEventSource.asObservable();
 	toggle$ = this._menuToggleEventSource.asObservable();
@@ -28,49 +31,80 @@ export class Headquarter {
 	serviceChange$ = this._serviceActivationSource.asObservable();
 	actionChange$ = this._currentActionSource.asObservable();
 	messageChange$ = this._currentMessageSource.asObservable();
+	contextMenuChange$ = this._contextMenuSource.asObservable();
+	saveMenuOpen$ = this._saveMenuSource.asObservable();
 	
 	reset() :void {
 		this._globalEventSource.next("reset");
 		this._currentActionSource.next("");
 		this._currentMessageSource.next("");
 		this.switchService(this.defaultService);
+		this.detectKeyPress = true;
 	}
 	
 	alertMainMouseEvent($event, action:string) :void {
 		this.reset();
 	}
-	
+
 	alertCellMouseEvent($event, action :string, cell :Cell) :void {
 		if(this.currentService){
 			this.currentService.alertCellMouseEvent( $event , action , cell );
 		}
 	}
 	
+	alertNavbarEvent(event:string, data:any) :void {
+		if(event == "SaveMenu"){
+				this.detectKeyPress = false;
+				console.log("Opening Save Menu with format "+data);
+			this._saveMenuSource.next(data);
+		}
+	}
+
 	switchService(service : Service){
 		if(this.currentService){
 			this.currentService.reset();
 		}
 		this.currentService = service;
+		this.detectKeyPress = true;
 	}
 	
 	sendMessage(msg :string){
 		this._currentMessageSource.next(msg);
 	}
 	
+	activateDefaultService(service : Service){
+		this.defaultService = service;
+		this.reset();
+	}
+
 	activateService(service : Service){
 		this.switchService(service);
 	}
 	
+	openContextMenu(event: MouseEvent, source:string, data :any){
+		this._contextMenuSource.next({event : event, source : source, data : data});
+	}
+
 	notifySelection(item){
+		console.log("Selection : ", item);
 		this._serviceActivationSource.next(item);
 		if(item.name == "delete"){
 			this._currentActionSource.next(`Deleting`);
+		} else if(item.name == "copy"){
+			this._currentActionSource.next(`Copying cells`);
+		} else if(item.name == "copyAndRotate"){
+			this._currentActionSource.next(`Copying cells with ${item.data.rotation} rotation`);
+		} else if(item.name == "move"){
+			this._currentActionSource.next(`Moving cells`);
 		} else {
 			this._currentActionSource.next(`Building ${item.longLabel}`);
 		}
 	}
 	
 	keyPress($event){
+		if(!this.detectKeyPress){
+			return;
+		}
 		if($event.keyCode != 0){
 			switch($event.keyCode){
 				case 27 : {
