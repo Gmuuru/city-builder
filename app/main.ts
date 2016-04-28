@@ -26,6 +26,8 @@ import {ServiceLoader} 		from "./ts/components/ServiceLoader";
 import {SelectAreaHolder} from "./ts/components/SelectArea";
 import {ContextMenuHolder} from "./ts/components/ContextMenu";
 import {SaveMenuHolder} from "./ts/components/SaveMenu";
+import {TemplatesMenu} from "./ts/components/TemplatesMenu";
+import {Template} from "./ts/components/TemplatesMenu";
 
 //############################ APP #########################################
 
@@ -43,6 +45,20 @@ import {SaveMenuHolder} from "./ts/components/SaveMenu";
           <ul class="nav navbar-nav">
           	<li class="dropdown">
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					New 
+					<span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu">
+					<li><a href="javascript:void(0)" (click)="newMap(10,10)">Tiny</a></li>
+					<li><a href="javascript:void(0)" (click)="newMap(25,25)">Small</a></li>
+					<li><a href="javascript:void(0)" (click)="newMap(50,50)">Normal</a></li>
+					<li><a href="javascript:void(0)" (click)="newMap(75,75)">Big</a></li>
+					<li><a href="javascript:void(0)" (click)="newMap(90,90)">Huge</a></li>
+					<li><a href="javascript:void(0)" (click)="newMap(120,120)">Enormous</a></li>
+				</ul>
+			</li>
+          	<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 					File 
 					<span class="caret"></span>
 				</a>
@@ -50,7 +66,13 @@ import {SaveMenuHolder} from "./ts/components/SaveMenu";
 		            <li>
 						<a href="javascript:void(0)" onclick="$('#upload').click()">Open</a>
 						<form>
-							<input id="upload" type="file" name=test style="visibility:hidden;position:absolute;top:0;left:0;width:0px" (change)="fileChangeEvent($event)">
+							<input id="upload" type="file" style="visibility:hidden;position:absolute;top:0;left:0;width:0px" (change)="fileChangeEvent($event)">
+						</form>
+					</li>
+		            <li>
+						<a href="javascript:void(0)" onclick="$('#import').click()">Import Templates</a>
+						<form>
+							<input id="import" type="file" multiple style="visibility:hidden;position:absolute;top:0;left:0;width:0px" (change)="importFileEvent($event)">
 						</form>
 					</li>
 					<li [ngClass]="{'disabled' : getLines().length == 0}">
@@ -63,19 +85,11 @@ import {SaveMenuHolder} from "./ts/components/SaveMenu";
 					</li>
 				</ul>
 			</li>
-			<li class="dropdown">
+			<li templates-menu [templates]="templates" class="dropdown">
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-					New 
+					Insert templates 
 					<span class="caret"></span>
 				</a>
-				<ul class="dropdown-menu">
-					<li><a href="javascript:void(0)" (click)="newMap(10,10)">Tiny</a></li>
-					<li><a href="javascript:void(0)" (click)="newMap(25,25)">Small</a></li>
-					<li><a href="javascript:void(0)" (click)="newMap(50,50)">Normal</a></li>
-					<li><a href="javascript:void(0)" (click)="newMap(75,75)">Big</a></li>
-					<li><a href="javascript:void(0)" (click)="newMap(90,90)">Huge</a></li>
-					<li><a href="javascript:void(0)" (click)="newMap(120,120)">Enormous</a></li>
-				</ul>
 			</li>
           </ul>
         </div>
@@ -112,7 +126,7 @@ import {SaveMenuHolder} from "./ts/components/SaveMenu";
 	host: {
 		'(document:keypress)': 'onKeyPress($event)'
 	},
-	directives: [LineComponent, BuildMenuComponent, ServiceLoader, SelectAreaHolder, ContextMenuHolder, SaveMenuHolder],
+	directives: [LineComponent, BuildMenuComponent, ServiceLoader, SelectAreaHolder, ContextMenuHolder, SaveMenuHolder, TemplatesMenu],
 	providers : [ProgressiveLoader, Renderer, Headquarter, PathService, BuildService, DeleteService, SplashService, SelectService, CopyService, MoveService, CopyAndRotateService]
 }
 )
@@ -123,6 +137,7 @@ class mainApp {
 	toggled : boolean;
 	currentAction : string;
 	currentMessage : string;
+	templates : Array<{name:string, content:Line[]}>;
 	
 	constructor(public renderer: Renderer, public HQ :Headquarter){
 		this.toggled = false;
@@ -144,6 +159,7 @@ class mainApp {
 				this.toggle();
 			}
 		);
+		this.templates = new Array<{name:string, content:Line[]}>();
 	}
 
 	getMapWidth(){
@@ -170,7 +186,7 @@ class mainApp {
 			line.complete();
 			lines.push(line);
 		}
-		this.renderer.render(lines);
+		this.render(lines);
 	}
 	
 	//navbar
@@ -192,19 +208,48 @@ class mainApp {
 	}
 	
 	// file reading
-	fileChangeEvent(fileInput: any){
-        this.file = (<File[]> fileInput.target.files)[0];
-		this.read();
+	fileChangeEvent($event: any){
+        var files = (<FileList> $event.target.files);
+		this.read(files, this.render.bind(this));
     }
+
+	importFileEvent($event){
+        var files = (<FileList> $event.target.files);
+		this.read(files, this.loadTemplate.bind(this));
+    }
+
 	
-	read(): void {
-		var reader : FileReader = new FileReader();
-		reader.onload  = (e) => {
-			this.toggled = true;
-			var lines = Parser.parse(reader.result);
-			this.renderer.render(lines);
-		};
-		reader.readAsText(this.file);
+	read(files:FileList, callback: (lines:Line[], any?) => any): void {
+		for(var i = 0; i < files.length; i++){
+			let file = files[i];
+			let reader : FileReader = new FileReader();
+			reader.onload  = 
+				((file) => {
+					return (
+						(e) => {
+						let lines = [];
+						try{
+							lines = Parser.parse(reader.result);
+						} catch(err){
+							console.log("Error parsing file "+file.name+" : ", err);
+						}
+						callback(lines, file);
+					}
+				);
+			})(file);
+			console.log("reading file ", file.name);
+			reader.readAsText(file);
+		}
+	}
+
+	render(lines:Line[]){
+		this.toggled = true;
+		this.renderer.loadMap(lines);
+	}
+
+	loadTemplate(lines:Line[], file:File){
+		lines = this.renderer.render(lines);
+		this.templates.push(new Template(file.name, lines));
 	}
 	
 	toggle() :void{

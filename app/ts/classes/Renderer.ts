@@ -10,31 +10,42 @@ export class Renderer {
 
 	lines : Line[];
 	storage : Line[];
-	init : boolean;
+	currentSource : Line[];
 	
 	constructor(public pl :ProgressiveLoader){
 		this.lines = [];
+		this.currentSource = [];
 	}
 	
-	render(lines : Line[]) :void {
+
+	loadMap(lines : Line[]) :void {
 	
 		this.reset();
-		this.storage = lines;
-		this.storage.forEach(
+		this.storage = this.render(lines);
+		this.currentSource = this.storage;
+		
+		this.pl.load(this.storage, this.lines);
+		
+		this.currentSource = this.lines;
+		
+	}
+	
+	render(lines : Line[]){
+		var bck = this.currentSource;
+		this.currentSource = lines;
+		this.currentSource.forEach(
 			(line) => {
 				line.cells.forEach(
-				
 					(cell) => {this.renderCell(cell, false);}
 				);
 			}
 		);
-		
-		this.pl.load(this.storage, this.lines);
-		
-		this.init = false;
-		
+		lines = this.currentSource;
+		this.currentSource = bck;
+
+		return lines;
 	}
-	
+
 	getLines() :Line[]{
 		return this.lines;
 	}
@@ -183,7 +194,7 @@ export class Renderer {
 	reset(){
 		this.lines = [];
 		this.storage = [];
-		this.init = true;
+		this.currentSource = this.storage;
 	}
 	
 	deleteBuilding(cell:Cell) :void {
@@ -399,7 +410,7 @@ export class Renderer {
 	
 	isIdentic(c : string, x:number, y:number) : boolean{
 	
-		var source = this.init ? this.storage : this.lines;
+		var source = this.currentSource;
 		
 		if(x < 0 || x == source.length || y < 0 || y == source[0].cells.length){
 			return false;
@@ -411,7 +422,7 @@ export class Renderer {
 	}
 	
 	spreadRefCell(ref:Cell){
-		var source = this.init ? this.storage : this.lines;
+		var source = this.currentSource;
 		var refLine:number = ref.lineIndex;
 		var refCol:number = ref.colIndex;
 		var refWidth:number = ref.getBuilding().width;
