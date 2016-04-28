@@ -3,6 +3,9 @@ import { FORM_DIRECTIVES } from 'angular2/common';
 import {Headquarter} 			from "../services/Headquarter";
 import {Renderer} 			from "../classes/Renderer";
 
+declare var saveAs: any;
+declare var html2canvas: any;
+
 @Component({
 
 	selector: 'save-menu-holder',
