@@ -96,8 +96,7 @@ export class MoveService extends GenericService {
 			}
 			for(var i = 0; i < buildingsList.length; i++){
 				var destination = this.highlightedCells[i];
-				this.highlightedCells[i].setBuilding(buildingsList[i]);
-				this.renderer.renderCell(this.highlightedCells[i], true);
+				this.renderer.updateCell(destination, buildingsList[i], true);
 			}
 			this.HQ.reset();
 		}

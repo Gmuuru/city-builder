@@ -21,6 +21,7 @@ export class BuildMenuComponent {
 	
 	constructor(public HQ : Headquarter){
 		
+		this.selected = "select";
 		this.sections.forEach(
 			(section) => {
 				section.isOpen = false;
@@ -56,8 +57,10 @@ export class BuildMenuComponent {
 		this.HQ.kbShortcut$.subscribe(
 			(code) => {
 				if(code == -1){
-					this.autoSelect({
+					this.select({
+						type : 'building',
 						name : 'delete',
+						service : 'delete',
 						label: 'Delete'
 					});
 				} else if(code == 114){
@@ -110,7 +113,12 @@ export class BuildMenuComponent {
 	}
 	
 	reset(){
-		this.selected = null;
+		this.select({
+			type : 'building',
+			name : 'select',
+			service : 'select',
+			label: 'Select'
+		});
 	}
 	
 	openSubcontent(section, item){
@@ -141,23 +149,30 @@ export class BuildMenuComponent {
 		return res;
 	}
 	
-	public sections:Array<any> = [
-    
-	{
-      title: 'Terrain',
-      content: [
+	public basicOperations:Array<any> = [
+		{
+			type : 'building',
+			name : 'select',
+			service : 'select',
+			label: 'Select'
+		},
 		{
 			type : 'building',
 			name : 'delete',
 			service : 'delete',
 			label: 'Delete'
 		},
+	];
+	public sections:Array<any> = [
+    
+	{
+      title: 'Terrain',
+      content: [
 		{
 			type : 'category',
 			name : 'grass',
 			label : 'Terrains',
 			subContent : [
-				this.formatBuildingData('grass'),
 				this.formatBuildingData('dirt'),
 				this.formatBuildingData('water'),
 				this.formatBuildingData('dunes')
@@ -165,10 +180,9 @@ export class BuildMenuComponent {
 		},
 		{
 			type : 'category',
-			name : 'tree',
+			name : 'rocks',
 			label : 'Features',
 			subContent : [
-				this.formatBuildingData('tree'),
 				this.formatBuildingData('rocks'),
 				this.formatBuildingData('saltmarsh'),
 				this.formatBuildingData('ore')
@@ -176,9 +190,10 @@ export class BuildMenuComponent {
 		},
 		{
 			type : 'category',
-			name : 'quarry',
+			name : 'tree',
 			label : 'Buildings',
 			subContent : [
+				this.formatBuildingData('tree'),
 				this.formatBuildingData('quarry')
 			]
 		}

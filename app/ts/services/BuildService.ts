@@ -46,6 +46,8 @@ export class BuildService extends GenericService {
 		this.highlightedCells.forEach(
 			(cell) => {cell.highlight(null)}
 		);
+		this.renderer.removeHightlightZone(this.highlightedCells);
+		
 		this.highlightedCells = [];
 		this.originCell = null;
 		this.buildOngoing = false;
@@ -59,13 +61,13 @@ export class BuildService extends GenericService {
 	}
 	
 	alertOnMouseUp($event, cell : Cell) :void {
+		console.log("building ? ");
 		if($event.button == 0 && cell && cell == this.originCell){
 			//left click
 			if(this.pathOK){
 				this.highlightedCells.forEach(
 					(hlCell) => {
-						hlCell.setBuilding(this.building);
-						this.renderer.renderCell(hlCell, false);
+						this.renderer.updateCell(hlCell, this.building, false);
 					}
 				);
 			}
@@ -101,6 +103,7 @@ export class BuildService extends GenericService {
 			this.highlightedCells.forEach(
 				(cell) => {cell.highlight(null)}
 			);
+			this.renderer.removeHightlightZone(this.highlightedCells);
 			this.highlightedCells = [];
 			
 			cells.forEach(
@@ -114,6 +117,7 @@ export class BuildService extends GenericService {
 					}
 				}
 			);
+			this.renderer.renderHightlightZone(this.highlightedCells, 'square');
 		} else {
 			pathOK = false;
 		}

@@ -19,15 +19,16 @@ import {Parser} 			from "./ts/classes/Parser";
 import {ProgressiveLoader} 	from "./ts/classes/ProgressiveLoader";
 import {Renderer} 			from "./ts/classes/Renderer";
 
+import {MapComponent} 		from "./ts/components/MapComponent";
 import {BuildMenuComponent} from "./ts/components/BuildMenu";
 import {Line} 				from "./ts/components/Line";
 import {LineComponent} 		from "./ts/components/Line";
 import {ServiceLoader} 		from "./ts/components/ServiceLoader";
-import {SelectAreaHolder} from "./ts/components/SelectArea";
-import {ContextMenuHolder} from "./ts/components/ContextMenu";
-import {SaveMenuHolder} from "./ts/components/SaveMenu";
-import {TemplatesMenu} from "./ts/components/TemplatesMenu";
-import {Template} from "./ts/components/TemplatesMenu";
+import {SelectAreaHolder} 	from "./ts/components/SelectArea";
+import {ContextMenuHolder} 	from "./ts/components/ContextMenu";
+import {SaveMenuHolder} 	from "./ts/components/SaveMenu";
+import {TemplatesMenu} 		from "./ts/components/TemplatesMenu";
+import {Template} 			from "./ts/components/TemplatesMenu";
 
 //############################ APP #########################################
 
@@ -101,9 +102,7 @@ import {Template} from "./ts/components/TemplatesMenu";
       </div>
     </nav>
 	<map-container class="panel panel-primary" (click)="click($event)" (contextmenu)="click($event)" [ngClass]="{expanded: toggled, collapsed: !toggled}">
-		<map id="map" style="width:{{getMapWidth()}}px">
-			<line-block *ngFor="#line of getLines()" [line]="line" style="width:{{line.getWidth()}}px"></line-block>
-		</map>
+		
 	</map-container>
 	
 	<build-menu *ngIf="getLines().length > 0" [ngClass]="{expanded: toggled, collapsed: !toggled}">
@@ -126,7 +125,7 @@ import {Template} from "./ts/components/TemplatesMenu";
 	host: {
 		'(document:keypress)': 'onKeyPress($event)'
 	},
-	directives: [LineComponent, BuildMenuComponent, ServiceLoader, SelectAreaHolder, ContextMenuHolder, SaveMenuHolder, TemplatesMenu],
+	directives: [MapComponent, LineComponent, BuildMenuComponent, ServiceLoader, SelectAreaHolder, ContextMenuHolder, SaveMenuHolder, TemplatesMenu],
 	providers : [ProgressiveLoader, Renderer, Headquarter, PathService, BuildService, DeleteService, SplashService, SelectService, CopyService, MoveService, CopyAndRotateService]
 }
 )
@@ -160,14 +159,6 @@ class mainApp {
 			}
 		);
 		this.templates = new Array<{name:string, content:Line[]}>();
-	}
-
-	getMapWidth(){
-		var lines = this.getLines();
-		if(lines.length > 0){
-			return lines[0].getWidth();
-		}
-		return 0;
 	}
 
 	getLines() :Line[]{
@@ -237,7 +228,6 @@ class mainApp {
 					}
 				);
 			})(file);
-			console.log("reading file ", file.name);
 			reader.readAsText(file);
 		}
 	}

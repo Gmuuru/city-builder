@@ -1,3 +1,22 @@
+map.background {
+	background-image : url("img/grass.gif");
+	background-repeat : repeat;
+	z-index:200;
+}
+
+map.background .select-area {
+	z-index:400;
+	opacity:0.5;
+}
+
+map .building {
+	z-index:500;
+}
+
+map .building .hl {
+	z-index:600;
+}
+
 .delete {
 	background-image : url("img/delete.gif");
 }

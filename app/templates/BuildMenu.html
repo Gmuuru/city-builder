@@ -1,4 +1,15 @@
 <accordion class="panel-group">
+	<div class="row panel-body">
+		<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" 
+			*ngFor="#item of basicOperations">
+			<div class="btn col-xs-12 col-sm-12 col-md-12 col-lg-12" 
+				[ngClass]="{'btn-default' : selected != item.name, 'btn-primary' : selected == item.name}"
+				(click)="select(item)">
+				<div class="icon {{item.name}}"></div>
+				<div>{{item.label}}</div>
+			</div>
+		</div>
+	</div>
 	<div *ngFor="#section of sections" 
 		[ngClass]="{'panel-primary':section.isOpen, 'panel-default':!section.isOpen}">
 		<div class="panel-heading" [class-switch]="section.isOpen" (click)="toggle(section)">{{section.title}}</div>

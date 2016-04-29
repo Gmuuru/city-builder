@@ -50,6 +50,7 @@ export class DeleteService extends GenericService {
 		this.highlightedCells.forEach(
 			(cell) => {cell.highlight(null)}
 		);
+		this.renderer.removeHightlightZone(this.highlightedCells);
 		this.highlightedCells = [];
 		this.originCell = null;
 		this.currentCell = null;
@@ -102,6 +103,7 @@ export class DeleteService extends GenericService {
 			this.highlightedCells.forEach(
 				(cell) => {cell.highlight(null)}
 			);
+			this.renderer.removeHightlightZone(this.highlightedCells);
 			this.highlightedCells = [];
 			
 			cells.forEach(
@@ -114,6 +116,8 @@ export class DeleteService extends GenericService {
 					}
 				}
 			);
+
+			this.renderer.renderHightlightZone(this.highlightedCells, 'square');
 		}
 	}
 	

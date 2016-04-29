@@ -1,4 +1,5 @@
 import {Injectable} from "angular2/core";
+import {Subject}    	from 'rxjs/Subject';
 
 import {ProgressiveLoader} from "./ProgressiveLoader";
 import {Line} from "../components/Line";
@@ -11,6 +12,13 @@ export class Renderer {
 	lines : Line[];
 	storage : Line[];
 	currentSource : Line[];
+
+	private _zoneHighlightSource = new Subject<{action:string, cells:Cell[], shape:string}>();
+	private _cellUpdateSource = new Subject<{action:string, cell:Cell}>();
+	private _resetSource = new Subject<string>();
+	zoneHightlight$ = this._zoneHighlightSource.asObservable();
+	cellUpdate$ = this._cellUpdateSource.asObservable();
+	reset$ = this._resetSource.asObservable();
 	
 	constructor(public pl :ProgressiveLoader){
 		this.lines = [];
@@ -31,12 +39,13 @@ export class Renderer {
 	}
 	
 	render(lines : Line[]){
+		this._resetSource.next("reset");
 		var bck = this.currentSource;
 		this.currentSource = lines;
 		this.currentSource.forEach(
 			(line) => {
 				line.cells.forEach(
-					(cell) => {this.renderCell(cell, false);}
+					(cell) => {this.updateCell(cell, cell.getBuilding(), false);}
 				);
 			}
 		);
@@ -219,8 +228,7 @@ export class Renderer {
 		}
 		cell.ref = null;
 		cell.referenced = [];
-		cell.setBuilding(Building.getDefaultBuilding());
-		cell.render(sc);
+		this.updateCell(cell, Building.getDefaultBuilding(), true);
 		
 		if(originalChar != null && (originalChar == '-' || originalChar == 't' || originalChar == '_')){
 			// on met a jour les cellules autour
@@ -230,8 +238,7 @@ export class Renderer {
 	}
 	
 	copyCell(source:Cell, destination:Cell) :void{
-		destination.setBuilding(source.getBuilding());
-		this.renderCell(destination, true);
+		this.updateCell(destination, source.getBuilding(), true);
 	}
 
 	isBuildingEntirelyInSelection(cell:Cell, selection:Cell[]){
@@ -271,6 +278,24 @@ export class Renderer {
 		}
 	}
 
+	updateCell(cell:Cell, building:Building, renderSurroundingCells:boolean) :void {
+
+		cell.setBuilding(building);
+		this.renderCell(cell, renderSurroundingCells);
+
+	}
+
+	updateCellContent(cell:Cell, sc:number){
+		cell.render(sc);
+		if(!cell.ref){
+			if(cell.isEmpty()){
+				this._cellUpdateSource.next({action : "delete", cell : cell});
+			} else {
+				this._cellUpdateSource.next({action : "update", cell : cell});
+			}
+		}
+	}
+
 	renderCell(cell:Cell, renderSurroundingCells : boolean):void {
 		
 		if(cell.ref){
@@ -278,7 +303,7 @@ export class Renderer {
 		}
 		var c:string = cell.getBuilding().char; 
 		var sc:number = this.getSurroundingConfig(c, cell.lineIndex, cell.colIndex);
-		cell.render(sc);
+		this.updateCellContent(cell, sc);
 		
 		if(cell.getBuilding().width+cell.getBuilding().height > 2){
 			this.spreadRefCell(cell);
@@ -289,6 +314,13 @@ export class Renderer {
 			this.renderSurroundingCells(cell.lineIndex, cell.colIndex, sc);
 		}
 		
+	}
+
+	renderHightlightZone(cells:Cell[], shape:string){
+		this._zoneHighlightSource.next({action:'render', cells:cells, shape:shape});
+	}
+	removeHightlightZone(cells:Cell[]){
+		this._zoneHighlightSource.next({action:'remove', cells:cells, shape:null});
 	}
 	
 	renderSurroundingCells(x:number, y:number, sc:number){
@@ -301,26 +333,27 @@ export class Renderer {
 			// top cell
 			cellToRender = this.lines[x-1].cells[y];
 			scToRender = this.getSurroundingConfig(cellToRender.getBuilding().char, cellToRender.lineIndex, cellToRender.colIndex);
-			cellToRender.render(scToRender);
+			this.updateCellContent(cellToRender, scToRender);
 		}
 		if(sc == 2 || sc == 6 || sc == 8 || sc == 9 || sc == 11 || sc == 13 || sc == 14 || sc == 15){
 			//right cell
 			cellToRender = this.lines[x].cells[y+1];
 			scToRender = this.getSurroundingConfig(cellToRender.getBuilding().char, cellToRender.lineIndex, cellToRender.colIndex);
-			cellToRender.render(scToRender);
+			this.updateCellContent(cellToRender, scToRender);
 		}
 		if(sc == 3 || sc == 5 || sc == 9 || sc == 10 || sc == 12 || sc == 13 || sc == 14 || sc == 15){
 			//bottom cell
 			cellToRender = this.lines[x+1].cells[y];
 			scToRender = this.getSurroundingConfig(cellToRender.getBuilding().char, cellToRender.lineIndex, cellToRender.colIndex);
-			cellToRender.render(scToRender);
+			this.updateCellContent(cellToRender, scToRender);
 		}
 		if(sc == 4 || sc == 6 || sc == 7 || sc == 10 || sc == 11 || sc == 12 || sc == 13 || sc == 15){
 			//left cell
 			cellToRender = this.lines[x].cells[y-1];
 			scToRender = this.getSurroundingConfig(cellToRender.getBuilding().char, cellToRender.lineIndex, cellToRender.colIndex);
-			cellToRender.render(scToRender);
+			this.updateCellContent(cellToRender, scToRender);
 		}
+
 	}
 	
 	/*	0   1				5		  7  8			 b		 c			 e		 f

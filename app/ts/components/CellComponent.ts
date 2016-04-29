@@ -9,7 +9,7 @@ import {Headquarter} 				from "../services/Headquarter";
 	selector: 'cell-block',
 	inputs:['cell'],
 	template: `
-		<div style="width:{{cell.getBuildingWidth()}}px; height:{{cell.getBuildingHeight()}}px" class="{{cell.getBuildingName()}}" 
+		<div style="width:{{cell.getBuildingWidth()}}px; height:{{cell.getBuildingHeight()}}px" class="building {{cell.getBuildingName()}}" 
 			(mousedown)="mouseDown($event)"
 			(mouseup)="mouseUp($event)"
 			(mouseenter)="mouseEnter($event)"

@@ -45,6 +45,7 @@ export class SplashService extends GenericService {
 		this.highlightedCells.forEach(
 			(cell) => {cell.highlight(null)}
 		);
+		this.renderer.removeHightlightZone(this.highlightedCells);
 		this.highlightedCells = [];
 		this.originCell = null;
 		this.currentCell = null;
@@ -66,8 +67,7 @@ export class SplashService extends GenericService {
 				this.highlightedCells.forEach(
 					(hlCell) => {
 						if(hlCell.hl == "green"){
-							hlCell.setBuilding(this.building);
-							this.renderer.renderCell(hlCell, false);
+							this.renderer.updateCell(hlCell, this.building, false);
 						}
 					}
 				);
@@ -100,6 +100,7 @@ export class SplashService extends GenericService {
 			this.highlightedCells.forEach(
 				(cell) => {cell.highlight(null)}
 			);
+			this.renderer.removeHightlightZone(this.highlightedCells);
 			this.highlightedCells = [];
 			
 			cells.forEach(
@@ -112,6 +113,7 @@ export class SplashService extends GenericService {
 					}
 				}
 			);
+			this.renderer.renderHightlightZone(this.highlightedCells, 'square');
 		}
 	}
 	

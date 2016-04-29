@@ -57,6 +57,7 @@ export class PathService extends GenericService {
 		this.highlightedCells.forEach(
 			(cell) => {cell.highlight(null)}
 		);
+		this.renderer.removeHightlightZone(this.highlightedCells);
 		this.highlightedCells = [];
 		this.originCell = null;
 		this.currentCell = null;
@@ -77,8 +78,7 @@ export class PathService extends GenericService {
 			if(cell && this.pathOK){
 				this.highlightedCells.forEach(
 					(hlCell) => {
-						hlCell.setBuilding(this.building);
-						this.renderer.renderCell(hlCell, true);
+						this.renderer.updateCell(hlCell, this.building, true);
 					}
 				);
 			}
@@ -111,6 +111,7 @@ export class PathService extends GenericService {
 		this.highlightedCells.forEach(
 			(cell) => {cell.highlight(null)}
 		);
+		this.renderer.removeHightlightZone(this.highlightedCells);
 		this.highlightedCells = [];
 		var cells = [];
 		var oobDetected = false;
@@ -151,6 +152,7 @@ export class PathService extends GenericService {
 				}
 			}
 		);
+		this.renderer.renderHightlightZone(this.highlightedCells, 'path');
 		this.HQ.sendMessage(`${this.highlightedCells.length} cells`);
 		return pathOK;
 	}
