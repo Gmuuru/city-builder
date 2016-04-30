@@ -71,9 +71,9 @@ export class SelectService extends GenericService {
 		if(!this.selectOngoing){
 			this.originCell = cell;
 		}
-		this.highlightCells();
 
 		if(this.selectOngoing){
+			this.highlightCells();
 			this._selectCellsSource.next($event);
 		}
 	}
@@ -114,6 +114,7 @@ export class SelectService extends GenericService {
 			this.highlightedCells.forEach(
 				(cell) => {cell.highlight(null)}
 			);
+			this.renderer.removeHightlightZone(this.highlightedCells);
 			this.highlightedCells = [];
 			
 			cells.forEach(
@@ -124,6 +125,7 @@ export class SelectService extends GenericService {
 					}
 				}
 			);
+			this.renderer.selectZone(this.highlightedCells);
 		}
 	}
 }

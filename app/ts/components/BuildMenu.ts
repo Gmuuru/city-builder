@@ -1,6 +1,6 @@
 import { Component }								from "angular2/core";
 import {Subscription}   							from 'rxjs/Subscription';
-import { Collapse  } 								from 'ng2-bootstrap/ng2-bootstrap';
+import { CollapseDirective  } 								from 'ng2-bootstrap/ng2-bootstrap';
 import {Cell} 										from "../components/Cell";
 import {Headquarter} 										from "../services/Headquarter";
 import {HighlightDirective} 						from "../directives/highlight.directive";
@@ -9,7 +9,7 @@ import {NgClass} 									from 'angular2/common';
 @Component(
 {
 	selector: 'build-accordion',
-	directives:[HighlightDirective, Collapse, NgClass],
+	directives:[HighlightDirective, CollapseDirective, NgClass],
 	templateUrl: 'app/templates/BuildMenu.html',
 }
 )
@@ -173,7 +173,6 @@ export class BuildMenuComponent {
 			name : 'grass',
 			label : 'Terrains',
 			subContent : [
-				this.formatBuildingData('dirt'),
 				this.formatBuildingData('water'),
 				this.formatBuildingData('dunes')
 			]
@@ -184,16 +183,16 @@ export class BuildMenuComponent {
 			label : 'Features',
 			subContent : [
 				this.formatBuildingData('rocks'),
-				this.formatBuildingData('saltmarsh'),
-				this.formatBuildingData('ore')
+				this.formatBuildingData('tree')
 			]
 		},
 		{
 			type : 'category',
 			name : 'tree',
-			label : 'Buildings',
+			label : 'Resources',
 			subContent : [
-				this.formatBuildingData('tree'),
+				this.formatBuildingData('ore'),
+				this.formatBuildingData('saltmarsh'),
 				this.formatBuildingData('quarry')
 			]
 		}

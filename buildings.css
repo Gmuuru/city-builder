@@ -4,9 +4,18 @@ map.background {
 	z-index:200;
 }
 
-map.background .select-area {
+map.background .hl-area {
 	z-index:400;
 	opacity:0.5;
+	cursor:default;
+}
+
+map.background .select-area {
+	z-index:800;
+	opacity:0.5;
+	cursor:default;
+	border:1px dotted black;
+	background-color : #d6ebf2;
 }
 
 map .building {

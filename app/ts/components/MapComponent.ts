@@ -1,12 +1,14 @@
 import { Component, ViewChild, ElementRef } from "angular2/core";
 import {Headquarter} 			from "../services/Headquarter";
-import {Renderer} 			from "../classes/Renderer";
-import {Cell} from "../components/Cell";
+import {SelectService} 			from "../services/SelectService";
+import {Renderer} 				from "../classes/Renderer";
+import {Cell} 					from "../components/Cell";
+import {ContextMenuDirective} 	from "../directives/contextmenu.directive";
 
 @Component({
 
 	selector: 'map-container',
-	directives :[],
+	directives :[ContextMenuDirective],
 	template: `
 		<map #map style="width:{{getMapWidth()}}px;height:{{getMapHeight()}}px" class="background"
 			(mousemove)="onMouseMove($event)"
@@ -25,7 +27,13 @@ import {Cell} from "../components/Cell";
 						</div>
 				</div>
 			</div>
-			<div class="select-area hl-green" [ngStyle]="getHLArea"></div>
+			<div class="hl-area hl-green glyphicon orientation" [ngStyle]="getHLArea"
+				[ngClass]="{ 'glyphicon-chevron-up' : (orientation == 'v' ||  orientation == 'n'),
+					    'glyphicon-chevron-right' : (orientation == 'h' ||  orientation == 'e'),
+						'glyphicon-chevron-down' : orientation == 's',
+					    'glyphicon-chevron-left' : orientation == 'w'}"></div>
+			<div class="hl-area hl-green" [ngStyle]="getHLSubArea"></div>
+			<div class="select-area" [ngStyle]="selectArea" [context-menu]="'select'" [contextData]="selectedCells"></div>
 		</map>
 	`
 })
@@ -33,12 +41,24 @@ export class MapComponent {
 
 	buildings:any;
 	currentPosition:string;
+	orientation:string;
+
 	hlArea :any;
 	hlSubArea :any;
+	selectArea:any;
+	selectedCells:Cell[];
+
+	defaultArea:any = {
+		'position':'absolute',
+		'top':'0px',
+		'left':'0px',
+		'width':'0px',
+		'height':'0px'
+	};
 
 	@ViewChild('map') map:ElementRef;
 
-	constructor(public renderer:Renderer, public HQ : Headquarter){
+	constructor(public renderer:Renderer, public HQ : Headquarter, public selectService : SelectService){
 		this.reset();
 		this.renderer.reset$.subscribe(
 			(inq) => {
@@ -71,10 +91,20 @@ export class MapComponent {
 				var action = inputData.action;
 				var cells = inputData.cells;
 				var shape = inputData.shape;
-				if(action == "render"){
+				if(action == "highlight"){
 					this.hightlightZone(cells, shape);
 				} else if(action == "remove"){
 					this.removeHighlight(cells);
+				} else if(action == "select"){
+					this.selectZone(cells);
+				}
+			}
+		);
+
+		this.selectService.selectChange$.subscribe(
+			($event) => {
+				 if($event.type=="mouseup"){
+					this.selectedCells = this.selectService.highlightedCells;
 				}
 			}
 		);
@@ -83,25 +113,34 @@ export class MapComponent {
 	reset(){
 		this.buildings = {};
 		this.currentPosition = "";
-		this.hlArea = {
-			'position':'absolute',
-			'top':'0px',
-			'left':'0px',
-			'width':'0px',
-			'height':'0px'
-		};
-		this.hlSubArea = {
-			'position':'absolute',
-			'top':'0px',
-			'left':'0px',
-			'width':'0px',
-			'height':'0px'
-		};
 	}
 
+	resetZones(){
+		this.orientation = "";
+		this.hlArea = this.defaultArea;
+		this.hlSubArea = this.defaultArea;
+		this.selectArea = this.defaultArea;
+	}
+
+	selectZone(cells:Cell[]){
+		if(!cells || cells.length == 0){
+			return;
+		}
+		cells.forEach(
+			(cell) => {
+				if(this.buildings[this.cellPosition(cell)]){
+					this.buildings[this.cellPosition(cell)].highlight(cell.hl, cell.hlOrientation);
+				} else if(cell.ref && this.buildings[this.cellPosition(cell.ref)]){
+					this.buildings[this.cellPosition(cell.ref)].highlight(cell.hl, cell.hlOrientation);
+				}
+				
+			}
+		);
+		this.selectArea = this.squareArea(cells);
+	}
 	hightlightZone(cells:Cell[], shape:string){
 
-		if(!cells){
+		if(!cells || cells.length == 0){
 			return;
 		}
 
@@ -124,8 +163,12 @@ export class MapComponent {
 	}
 
 	squareArea(cells:Cell[]){
+		if(!cells || cells.length == 0){
+			return this.defaultArea;
+		}
 		var height = (cells[cells.length-1].lineIndex - cells[0].lineIndex +1)*16;
 		var width = (cells[cells.length-1].colIndex - cells[0].colIndex +1)*16;
+		this.orientation = cells[0].hlOrientation;
 		return {
 			'position':'absolute',
 			'top':cells[0].lineIndex * 16+'px',
@@ -136,24 +179,44 @@ export class MapComponent {
 	}
 
 	pathArea(cells:Cell[]){
-		var verticalCells = [];
-		var horizontalCells = [];
+		var mainCells = [];
+		var subCells = [];
 
 		var horizontalLineIndex = null;
+		var verticalColIndex = null;
 		cells.forEach(
 			(cell) => {
 				if(!horizontalLineIndex){
 					horizontalLineIndex = cell.lineIndex;
 				}
-				if(cell.lineIndex == horizontalLineIndex){
-					horizontalCells.push(cell);
+				if(!verticalColIndex){
+					verticalColIndex = cell.colIndex;
+				}
+				if(cell.lineIndex == horizontalLineIndex || cell.colIndex == verticalColIndex){
+					mainCells.push(cell);
 				} else {
-					verticalCells.push(cell);
+					subCells.push(cell);
 				}
 			}
 		);
-		this.hlArea = this.squareArea(horizontalCells);
-		this.hlSubArea = this.squareArea(verticalCells);
+		mainCells.sort(
+			(a, b) => {
+				if(a.lineIndex == b.lineIndex){
+					return a.colIndex - b.colIndex;
+				}
+				return a.lineIndex - b.lineIndex;
+			}
+		);
+		subCells.sort(
+			(a, b) => {
+				if(a.lineIndex == b.lineIndex){
+					return a.colIndex - b.colIndex;
+				}
+				return a.lineIndex - b.lineIndex;
+			}
+		);
+		this.hlArea = this.squareArea(mainCells);
+		this.hlSubArea = this.squareArea(subCells);
 
 	}
 
@@ -167,20 +230,7 @@ export class MapComponent {
 				}
 			}
 		);
-		this.hlArea = {
-			'position':'absolute',
-			'top':'0px',
-			'left':'0px',
-			'width':'0px',
-			'height':'0px'
-		};
-		this.hlSubArea = {
-			'position':'absolute',
-			'top':'0px',
-			'left':'0px',
-			'width':'0px',
-			'height':'0px'
-		};
+		this.resetZones();
 	}
 
 	getCurrentCellFromMousePos($event) :Cell {

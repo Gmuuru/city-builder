@@ -316,8 +316,12 @@ export class Renderer {
 		
 	}
 
+	selectZone(cells:Cell[]){
+		this._zoneHighlightSource.next({action:'select', cells:cells, shape:""});
+	}
+
 	renderHightlightZone(cells:Cell[], shape:string){
-		this._zoneHighlightSource.next({action:'render', cells:cells, shape:shape});
+		this._zoneHighlightSource.next({action:'highlight', cells:cells, shape:shape});
 	}
 	removeHightlightZone(cells:Cell[]){
 		this._zoneHighlightSource.next({action:'remove', cells:cells, shape:null});

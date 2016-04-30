@@ -24,7 +24,6 @@ import {BuildMenuComponent} from "./ts/components/BuildMenu";
 import {Line} 				from "./ts/components/Line";
 import {LineComponent} 		from "./ts/components/Line";
 import {ServiceLoader} 		from "./ts/components/ServiceLoader";
-import {SelectAreaHolder} 	from "./ts/components/SelectArea";
 import {ContextMenuHolder} 	from "./ts/components/ContextMenu";
 import {SaveMenuHolder} 	from "./ts/components/SaveMenu";
 import {TemplatesMenu} 		from "./ts/components/TemplatesMenu";
@@ -118,14 +117,13 @@ import {Template} 			from "./ts/components/TemplatesMenu";
 		</div>
 	</build-menu>
 	<service-loader></service-loader>
-	<select-zone-holder></select-zone-holder>
 	<context-menu-holder></context-menu-holder>
 	<save-menu-holder></save-menu-holder>
 	`,
 	host: {
 		'(document:keypress)': 'onKeyPress($event)'
 	},
-	directives: [MapComponent, LineComponent, BuildMenuComponent, ServiceLoader, SelectAreaHolder, ContextMenuHolder, SaveMenuHolder, TemplatesMenu],
+	directives: [MapComponent, LineComponent, BuildMenuComponent, ServiceLoader, ContextMenuHolder, SaveMenuHolder, TemplatesMenu],
 	providers : [ProgressiveLoader, Renderer, Headquarter, PathService, BuildService, DeleteService, SplashService, SelectService, CopyService, MoveService, CopyAndRotateService]
 }
 )

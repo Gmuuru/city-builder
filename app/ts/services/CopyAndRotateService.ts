@@ -153,6 +153,7 @@ export class CopyAndRotateService extends GenericService {
 				}
 			}
 		);
+		this.renderer.renderHightlightZone(this.highlightedCells, 'square');
 		this.isZoneOK = this.isZoneOK && pathIsClear;
 	}
 
@@ -160,6 +161,7 @@ export class CopyAndRotateService extends GenericService {
 		this.highlightedCells.forEach(
 				(cell) => {cell.highlight(null)}
 		);
+		this.renderer.removeHightlightZone(this.highlightedCells);
 		this.highlightedCells = [];
 	}
 	

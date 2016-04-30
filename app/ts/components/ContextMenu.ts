@@ -10,7 +10,7 @@ import {HighlightDirective} 	from "../directives/highlight.directive";
     	'(document:click)':'clickedOutside()',
 	},
 	template: `
-		<div [ngStyle]="locationCss" class="container">
+		<div [ngStyle]="locationCss" class="container context-menu-container">
 	      <div class="panel panel-primary context-menu">
 	      	<div class="panel-heading">Context Menu</div>
 
@@ -106,6 +106,7 @@ export class ContextMenuHolder {
 	}
 
 	showMenu(event){
+		console.log("opening menu !");
 		this.isShown = true;
 		this.mouseLocation = {
 		  left:event.clientX,
