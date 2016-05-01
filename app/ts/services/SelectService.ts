@@ -92,7 +92,6 @@ export class SelectService extends GenericService {
 		} else if($event.button == 1){
 			this.reset();
 		}
-		throw new Error("exception !");
 	}
 	
 	alertOnMouseDown($event, cell : Cell) :void {
