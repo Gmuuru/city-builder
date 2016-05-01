@@ -59,7 +59,7 @@ build-menu .accordion-container accordion, build-menu .accordion-container .pane
     width: 300px;
 }
 build-menu .accordion-container > .panel-heading {
-	height: 7vh;
+	height: 6vh;
 	max-height:42px;
     padding: 1vh;
 }
@@ -139,14 +139,25 @@ map-container.expanded {
 	width:calc(100vw - 350px);
 }
 
-selected-zone {
-	display : block;
-	position : absolute;
-	border : 1px dotted black;
-	background-color : #d6ebf2;
-	opacity : 0.5;
-}
-
 div.panel-primary.panel-primary-clicked > .panel-heading {
 	background-image:linear-gradient(to top, #337ab7 0px, #2e6da4 100%);
+}
+
+@keyframes show-errors {
+    from {top:-50px;}
+    to {top:85px;}
+}
+
+.alert-container {
+	animation-duration: 500ms;
+    animation-name: show-errors;
+    left: calc(50% - 15vw);
+    position: absolute;
+    top: 85px;
+    width: 30vw;
+    z-index: 2000;
+}
+
+.alert-container-body {
+    padding: 15px 15px 0;
 }

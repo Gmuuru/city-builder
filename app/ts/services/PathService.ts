@@ -25,30 +25,37 @@ export class PathService extends GenericService {
 	
 
 	init( args? : any ) :void {
-		if(args && args.name){
-			var name = args.name;
-			this.building = Cell.getBuildingData(Cell.getCharFromName(name));
-			this.lineOnly = false;
-			if(this.building.name.indexOf("improad") == 0 || this.building.name.indexOf("grandroad") == 0){
-				this.lineOnly = true;
+		try {
+			if(args && args.name){
+				var name = args.name;
+				this.building = Cell.getBuildingData(Cell.getCharFromName(name));
+				this.lineOnly = false;
+				if(this.building.name.indexOf("improad") == 0 || this.building.name.indexOf("grandroad") == 0){
+					this.lineOnly = true;
+				}
+				console.log(`${this.name} initialized with ${name} (${this.building.name})`);
 			}
-			console.log(`${this.name} initialized with ${name} (${this.building.name})`);
+		} catch (err) {
+			this.HQ.log(err);
 		}
 	}
 
 	alertCellMouseEvent($event, action :string, cell :Cell) :void {
-	
-		if( action == "enter" ){
-			this.alertOnEnter( $event , cell );
-		}
-		else if( action == "up" ){
-			this.alertOnMouseUp( $event , cell );
-		} 
-		else if( action == "down" ){
-			this.alertOnMouseDown( $event , cell );
-		}
-		else {
-			console.log(`Error, unknown action ${action} for provider RoadService`);
+		try {
+			if( action == "enter" ){
+				this.alertOnEnter( $event , cell );
+			}
+			else if( action == "up" ){
+				this.alertOnMouseUp( $event , cell );
+			} 
+			else if( action == "down" ){
+				this.alertOnMouseDown( $event , cell );
+			}
+			else {
+				console.log(`Error, unknown action ${action} for provider RoadService`);
+			}
+		} catch (err) {
+			this.HQ.log(err);
 		}
 	}
 	

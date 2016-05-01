@@ -28,6 +28,7 @@ import {ContextMenuHolder} 	from "./ts/components/ContextMenu";
 import {SaveMenuHolder} 	from "./ts/components/SaveMenu";
 import {TemplatesMenu} 		from "./ts/components/TemplatesMenu";
 import {Template} 			from "./ts/components/TemplatesMenu";
+import {AlertsComponent} 	from "./ts/components/AlertsComponent";
 
 //############################ APP #########################################
 
@@ -101,7 +102,7 @@ import {Template} 			from "./ts/components/TemplatesMenu";
       </div>
     </nav>
 	<map-container class="panel panel-primary" (click)="click($event)" (contextmenu)="click($event)" [ngClass]="{expanded: toggled, collapsed: !toggled}">
-		
+		<alerts-holder></alerts-holder>
 	</map-container>
 	
 	<build-menu *ngIf="getLines().length > 0" [ngClass]="{expanded: toggled, collapsed: !toggled}">
@@ -123,7 +124,7 @@ import {Template} 			from "./ts/components/TemplatesMenu";
 	host: {
 		'(document:keypress)': 'onKeyPress($event)'
 	},
-	directives: [MapComponent, LineComponent, BuildMenuComponent, ServiceLoader, ContextMenuHolder, SaveMenuHolder, TemplatesMenu],
+	directives: [MapComponent, LineComponent, BuildMenuComponent, ServiceLoader, ContextMenuHolder, SaveMenuHolder, TemplatesMenu, AlertsComponent],
 	providers : [ProgressiveLoader, Renderer, Headquarter, PathService, BuildService, DeleteService, SplashService, SelectService, CopyService, MoveService, CopyAndRotateService]
 }
 )

@@ -34,16 +34,20 @@ export class CopyAndRotateService extends GenericService {
 	}
 	
 	init( args? : any ) :void {
-		if(args.data && args.data.cells){
-			this.originalCells = args.data.cells;
-			this.rotation = args.data.rotation;
-			this.computeDimensions(args.data.cells);
-			this.cellsToCopy = this.rotateSelection(this.originalCells, this.rotation);
+		try {
+			if(args.data && args.data.cells){
+				this.originalCells = args.data.cells;
+				this.rotation = args.data.rotation;
+				this.computeDimensions(args.data.cells);
+				this.cellsToCopy = this.rotateSelection(this.originalCells, this.rotation);
 
-			console.log(`${this.name} initialized with ${this.cellsToCopy.length} cells with ${this.rotation} symetry`);
-		} else {
-			console.log(`${this.name} initialized wrongly ! no input data !`);
-			this.reset();
+				console.log(`${this.name} initialized with ${this.cellsToCopy.length} cells with ${this.rotation} symetry`);
+			} else {
+				console.log(`${this.name} initialized wrongly ! no input data !`);
+				this.reset();
+			}
+		} catch (err) {
+			this.HQ.log(err);
 		}
 	}
 
@@ -76,18 +80,21 @@ export class CopyAndRotateService extends GenericService {
 	
 
 	alertCellMouseEvent($event, action :string, cell :Cell) :void {
-	
-		if( action == "enter" ){
-			this.alertOnEnter( $event , cell );
-		}
-		else if( action == "up" ){
-			this.alertOnMouseUp( $event , cell );
-		} 
-		else if( action == "down" ){
-			this.alertOnMouseDown( $event , cell );
-		}
-		else {
-			console.log(`Error, unknown action ${action} for provider DeleteService`);
+		try {
+			if( action == "enter" ){
+				this.alertOnEnter( $event , cell );
+			}
+			else if( action == "up" ){
+				this.alertOnMouseUp( $event , cell );
+			} 
+			else if( action == "down" ){
+				this.alertOnMouseDown( $event , cell );
+			}
+			else {
+				console.log(`Error, unknown action ${action} for provider DeleteService`);
+			}
+		} catch (err) {
+			this.HQ.log(err);
 		}
 	}
 	

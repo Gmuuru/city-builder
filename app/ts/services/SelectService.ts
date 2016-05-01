@@ -37,18 +37,21 @@ export class SelectService extends GenericService {
 	}
 	
 	alertCellMouseEvent($event, action :string, cell :Cell) :void {
-	
-		if( action == "enter" ){
-			this.alertOnEnter( $event , cell );
-		}
-		else if( action == "up" ){
-			this.alertOnMouseUp( $event , cell );
-		} 
-		else if( action == "down" ){
-			this.alertOnMouseDown( $event , cell );
-		}
-		else {
-			console.log(`Error, unknown action ${action} for provider SelectService`);
+		try{
+			if( action == "enter" ){
+				this.alertOnEnter( $event , cell );
+			}
+			else if( action == "up" ){
+				this.alertOnMouseUp( $event , cell );
+			} 
+			else if( action == "down" ){
+				this.alertOnMouseDown( $event , cell );
+			}
+			else {
+				console.log(`Error, unknown action ${action} for provider SelectService`);
+			}
+		} catch(err){
+			this.HQ.log(err);
 		}
 	}
 	
@@ -67,6 +70,7 @@ export class SelectService extends GenericService {
 	}
 	
 	alertOnEnter($event, cell : Cell) :void {
+
 		this.currentCell = cell;
 		if(!this.selectOngoing){
 			this.originCell = cell;
@@ -88,6 +92,7 @@ export class SelectService extends GenericService {
 		} else if($event.button == 1){
 			this.reset();
 		}
+		throw new Error("exception !");
 	}
 	
 	alertOnMouseDown($event, cell : Cell) :void {

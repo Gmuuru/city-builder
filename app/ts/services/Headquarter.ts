@@ -15,7 +15,8 @@ export class Headquarter {
 		this.defaultService = null;
 		this.detectKeyPress = false;
 	}
-	
+
+	private _alertSource = new Subject<Error>();
 	private _kbShortcutEventSource = new Subject<number>();
 	private _menuToggleEventSource = new Subject<string>();
 	private _globalEventSource = new Subject<string>();
@@ -24,7 +25,8 @@ export class Headquarter {
 	private _currentMessageSource = new Subject<string>();
 	private _contextMenuSource = new Subject<{event : MouseEvent, source:string, data:any}>();
 	private _saveMenuSource = new Subject<any>();
-	
+
+	alert$ = this._alertSource.asObservable();
 	kbShortcut$ = this._kbShortcutEventSource.asObservable();
 	toggle$ = this._menuToggleEventSource.asObservable();
 	globalEventFired$ = this._globalEventSource.asObservable();
@@ -70,6 +72,10 @@ export class Headquarter {
 	
 	sendMessage(msg :string){
 		this._currentMessageSource.next(msg);
+	}
+
+	log(err:Error) :void {
+		this._alertSource.next(err);
 	}
 	
 	activateDefaultService(service : Service){

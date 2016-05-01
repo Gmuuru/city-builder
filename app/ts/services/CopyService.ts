@@ -30,13 +30,17 @@ export class CopyService extends GenericService {
 	}
 	
 	init( args? : any ) :void {
-		if(args.data){
-			this.cellsToCopy = args.data;
-			this.computeDimensions(args.data);
-			console.log(`CopyService initialized with ${this.cellsToCopy.length} cells`);
-		} else {
-			console.log(`CopyService initialized wrongly ! no input data !`);
-			this.reset();
+		try {
+			if(args.data){
+				this.cellsToCopy = args.data;
+				this.computeDimensions(args.data);
+				console.log(`CopyService initialized with ${this.cellsToCopy.length} cells`);
+			} else {
+				console.log(`CopyService initialized wrongly ! no input data !`);
+				this.reset();
+			}
+		} catch (err) {
+			this.HQ.log(err);
 		}
 	}
 
@@ -50,18 +54,21 @@ export class CopyService extends GenericService {
 	
 
 	alertCellMouseEvent($event, action :string, cell :Cell) :void {
-	
-		if( action == "enter" ){
-			this.alertOnEnter( $event , cell );
-		}
-		else if( action == "up" ){
-			this.alertOnMouseUp( $event , cell );
-		} 
-		else if( action == "down" ){
-			this.alertOnMouseDown( $event , cell );
-		}
-		else {
-			console.log(`Error, unknown action ${action} for provider DeleteService`);
+		try {
+			if( action == "enter" ){
+				this.alertOnEnter( $event , cell );
+			}
+			else if( action == "up" ){
+				this.alertOnMouseUp( $event , cell );
+			} 
+			else if( action == "down" ){
+				this.alertOnMouseDown( $event , cell );
+			}
+			else {
+				console.log(`Error, unknown action ${action} for provider DeleteService`);
+			}
+		} catch (err) {
+			this.HQ.log(err);
 		}
 	}
 	

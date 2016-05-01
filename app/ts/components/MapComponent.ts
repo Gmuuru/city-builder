@@ -10,6 +10,7 @@ import {ContextMenuDirective} 	from "../directives/contextmenu.directive";
 	selector: 'map-container',
 	directives :[ContextMenuDirective],
 	template: `
+		<ng-content></ng-content>
 		<map #map style="width:{{getMapWidth()}}px;height:{{getMapHeight()}}px" class="background"
 			(mousemove)="onMouseMove($event)"
 			(mousedown)="mouseDown($event)"
@@ -68,43 +69,55 @@ export class MapComponent {
 
 		this.renderer.cellUpdate$.subscribe(
 			(inputData) => {
-				var action = inputData.action;
-				var cell:Cell = inputData.cell;
-				var position = this.cellPosition(cell);
+				try {
+					var action = inputData.action;
+					var cell:Cell = inputData.cell;
+					var position = this.cellPosition(cell);
 
-				switch(action){
-					case 'build' :
-					case 'update' : {
-						this.buildings[position] = cell;
-						break;
+					switch(action){
+						case 'build' :
+						case 'update' : {
+							this.buildings[position] = cell;
+							break;
+						}
+						case 'delete' : {
+							delete this.buildings[position];
+							break;
+						}
 					}
-					case 'delete' : {
-						delete this.buildings[position];
-						break;
-					}
+				} catch (err) {
+					this.HQ.log(err);
 				}
 			}
 		);
 
 		this.renderer.zoneHightlight$.subscribe(
 			(inputData) => {
-				var action = inputData.action;
-				var cells = inputData.cells;
-				var shape = inputData.shape;
-				if(action == "highlight"){
-					this.hightlightZone(cells, shape);
-				} else if(action == "remove"){
-					this.removeHighlight(cells);
-				} else if(action == "select"){
-					this.selectZone(cells);
+				try {
+					var action = inputData.action;
+					var cells = inputData.cells;
+					var shape = inputData.shape;
+					if(action == "highlight"){
+						this.hightlightZone(cells, shape);
+					} else if(action == "remove"){
+						this.removeHighlight(cells);
+					} else if(action == "select"){
+						this.selectZone(cells);
+					}
+				} catch (err) {
+					this.HQ.log(err);
 				}
 			}
 		);
 
 		this.selectService.selectChange$.subscribe(
 			($event) => {
-				 if($event.type=="mouseup"){
-					this.selectedCells = this.selectService.highlightedCells;
+				try {
+					if($event.type=="mouseup"){
+						this.selectedCells = this.selectService.highlightedCells;
+					}
+				} catch (err) {
+					this.HQ.log(err);
 				}
 			}
 		);
@@ -113,6 +126,7 @@ export class MapComponent {
 	reset(){
 		this.buildings = {};
 		this.currentPosition = "";
+		this.resetZones();
 	}
 
 	resetZones(){
